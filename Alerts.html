@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cảnh báo và lịch trực · NeuroTriage</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0F14}
+a{color:#4CC3E0}a:hover{color:#8DDCEE}
+.app{font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#E7EDF4;background:#0B0F14;font-size:14px;line-height:1.45;min-height:100vh;display:flex;flex-wrap:wrap}
+.side{flex:1 1 236px;background:#0F141B;border-right:1px solid #1F2935;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8796AA;padding:14px 12px 4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#A9B6C7;text-decoration:none;font-size:13.5px;min-height:24px}
+.nav:hover{background:#18202A;color:#E7EDF4}
+.nav.on{background:#14313B;color:#E7EDF4;font-weight:600}
+.num{font-size:11px;color:#8796AA;min-width:24px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid #1F2935;background:#0F141B}
+.body{padding:24px 28px 40px;display:flex;flex-direction:column;gap:20px}
+.card{background:#121820;border:1px solid #1F2935;border-radius:12px;padding:18px;min-width:0}
+.h{font-size:14px;font-weight:600;color:#E7EDF4;margin:0 0 12px}
+.lbl{font-size:12px;color:#93A3B8}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex:none}
+.red{background:#3A1719;color:#FF8A8A}.amb{background:#3A2C10;color:#F7C25E}.grn{background:#0F3020;color:#5FD39A}.blu{background:#10303A;color:#6FD3EA}.gry{background:#1E2733;color:#B4C0CF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid #2A3646;background:#18202A;color:#E7EDF4;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn:hover{background:#202B38;color:#E7EDF4}
+.btn.pri{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.sw{position:relative;width:46px;height:26px;border-radius:13px;border:none;cursor:pointer;flex:none;padding:0}
+.sw span{position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:600;color:#93A3B8;font-size:12px;padding:8px 10px;border-bottom:1px solid #1F2935;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #18202A;vertical-align:middle}
+.scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-template">
+
+<div class="app">
+<aside class="side" aria-label="Phân hệ">
+<div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">
+<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4CC3E0"></rect><path d="M7 17h5l2.5-6 3.5 11 2.5-5H25" stroke="#06232B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-weight:700;font-size:15px">NeuroTriage</div><div class="lbl">AI hỗ trợ chấn thương sọ não</div></div>
+</div>
+<nav style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{nav}}" as="n" hint-placeholder-count="20">
+<template data-sc="if" value="{{n.head}}" hint-placeholder-val="{{false}}"><div class="grp">{{n.t}}</div></template>
+<template data-sc="if" value="{{n.link}}" hint-placeholder-val="{{true}}"><a class="nav {{n.cls}}" href="{{n.href}}" aria-current="{{n.cur}}"><span class="mono num">{{n.num}}</span>{{n.t}}</a></template>
+</template>
+</nav>
+</aside>
+<main class="main">
+<header class="top">
+<div style="flex:1 1 320px;min-width:0"><div class="lbl">Phối hợp tuyến · 10</div><h1 style="margin:2px 0 0;font-size:20px;font-weight:700">Cảnh báo & lịch trực</h1></div>
+<span class="chip amb">Dữ liệu mô phỏng</span>
+<span class="chip red">{{openCount}} cảnh báo chưa xác nhận</span>
+<button type="button" class="btn pri">Thêm quy tắc</button>
+</header>
+<div class="body">
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section class="card" style="flex:999 1 560px;min-width:0">
+<h2 class="h">Cảnh báo đang mở</h2>
+<div style="display:flex;flex-direction:column;gap:10px">
+<template data-sc="for" list="{{alerts}}" as="a" hint-placeholder-count="4">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 14px;border-radius:10px;background:#0E141B;border:1px solid {{a.b}}">
+<span class="chip {{a.cls}}">{{a.lv}}</span>
+<div style="flex:1 1 260px;min-width:0"><div style="font-weight:600;font-size:13.5px">{{a.t}}</div><div class="lbl">{{a.d}}</div></div>
+<div style="text-align:right"><div class="mono" style="font-size:12px">{{a.time}}</div><div class="lbl">{{a.who}}</div></div>
+<button type="button" class="btn {{a.bcls}}" onClick="{{a.ack}}">{{a.btn}}</button>
+</div>
+</template>
+</div>
+</section>
+<aside style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<section class="card">
+<h2 class="h">Chuỗi leo thang ca Đỏ</h2>
+<ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0">
+<template data-sc="for" list="{{esc}}" as="e" hint-placeholder-count="4">
+<li style="display:flex;gap:12px">
+<div style="display:flex;flex-direction:column;align-items:center"><span class="mono" style="width:28px;height:28px;border-radius:50%;background:#14313B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">{{e.n}}</span><div style="width:2px;flex:1;background:#1F2935;min-height:18px"></div></div>
+<div style="padding-bottom:14px"><div style="font-weight:600;font-size:13.5px">{{e.t}}</div><div class="lbl">{{e.d}}</div></div>
+</li>
+</template>
+</ol>
+</section>
+</aside>
+</div>
+<section class="card">
+<h2 class="h">Quy tắc cảnh báo</h2>
+<div style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{rules}}" as="r" hint-placeholder-count="6">
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid #18202A">
+<button type="button" class="sw" role="switch" aria-checked="{{r.on}}" aria-label="{{r.t}}" onClick="{{r.toggle}}" style="background:{{r.bg}}"><span style="left:{{r.x}}px"></span></button>
+<div style="flex:1 1 300px;min-width:0"><div style="font-weight:600;font-size:13.5px">{{r.t}}</div><div class="lbl">{{r.d}}</div></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><template data-sc="for" list="{{r.ch}}" as="c" hint-placeholder-count="2"><span class="chip gry">{{c}}</span></template></div>
+</div>
+</template>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Lịch trực hôm nay</h2>
+<div class="scroll"><table>
+<thead><tr><th>Vai trò</th><th>Cơ sở</th><th>Bác sĩ</th><th>Ca trực</th><th>Liên lạc</th><th>Trạng thái</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{roster}}" as="r" hint-placeholder-count="5">
+<tr><td>{{r.role}}</td><td>{{r.site}}</td><td>{{r.name}}</td><td class="mono">{{r.shift}}</td><td class="mono" style="font-size:12px">{{r.ph}}</td><td><span class="chip {{r.cls}}">{{r.st}}</span></td></tr>
+</template>
+</tbody></table></div>
+</section>
+</div>
+</main>
+</div>
+</template>
+<script src="assets/dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { acked: { 1: false, 2: false, 3: true, 4: false }, off: { 4: true } }; }
+  navVals(cur) {
+    const N = [['h','Lâm sàng'],['01','Tổng quan','Main'],['02','Tiếp nhận & sàng lọc','Intake'],['03','Danh sách ca đọc','Worklist'],['04','Đọc phim DICOM','Viewer'],['05','Phân tầng nguy cơ AI','Risk'],['06','Kết quả & báo cáo','Report'],['h','Phối hợp tuyến'],['07','Hội chẩn từ xa','Consult'],['08','Chuyển tuyến','Referral'],['09','Liên thông HIS/PACS','Integration'],['09b','Cấu hình liên thông','IntegrationConfig'],['10','Cảnh báo & trực','Alerts'],['h','Quản lý'],['11','Thống kê & chất lượng','Analytics'],['12','Quản trị hệ thống','Admin'],['h','AI Studio'],['13a','Dữ liệu & gán nhãn','Labeling'],['13b','Huấn luyện & đánh giá','Training'],['13c','Cấu hình mô hình AI','ModelConfig']];
+    return N.map(n => n[0] === 'h' ? { head: true, link: false, t: n[1] } : { head: false, link: true, num: n[0], t: n[1], href: n[2] + '.html', cls: n[2] === cur ? 'on' : '', cur: n[2] === cur ? 'page' : undefined });
+  }
+  renderVals() {
+    const s = this.state;
+    const A = [
+      [1, 'Đỏ', 'red', '#7A2A2E', 'XQ-2611-0139 · nghi lún sọ ở trẻ 7 tuổi', 'Chưa có BS CĐHA xác nhận · đã leo thang bước 2', '19:14', 'BS trực CĐHA tỉnh'],
+      [2, 'Vàng', 'amb', '#1F2935', 'CT-2611-0135 · AI không chắc (vùng xám)', 'Ca cần bác sĩ đọc trong 30 phút', '19:31', 'BS trực CĐHA'],
+      [3, 'Đỏ', 'red', '#1F2935', 'CT-2611-0142 · máu tụ dưới màng cứng 38 ml', 'Đã xác nhận sau 48 giây', '19:44', 'BS. H.A.'],
+      [4, 'Hệ thống', 'blu', '#1F2935', 'TYT xã [E] mất kết nối', 'Phiếu lưu ngoại tuyến, đã đồng bộ lại', '18:12', 'Kỹ thuật viên CNTT']
+    ];
+    const alerts = A.map(a => {
+      const done = !!s.acked[a[0]];
+      return { lv: a[1], cls: done ? 'gry' : a[2], b: done ? '#1F2935' : a[3], t: a[4], d: a[5], time: a[6], who: a[7], btn: done ? 'Đã xác nhận' : 'Xác nhận', bcls: done ? '' : 'pri', ack: () => this.setState({ acked: { ...this.state.acked, [a[0]]: !done } }) };
+    });
+    const R = [
+      [1, 'Ca mức Đỏ mới', 'Báo BS trực CĐHA và ngoại thần kinh trong vòng 1 phút', ['Ứng dụng', 'SMS', 'Gọi tự động']],
+      [2, 'Ca Đỏ chưa xác nhận sau 5 phút', 'Leo thang lên trưởng kíp và điều phối tỉnh', ['Ứng dụng', 'Gọi tự động']],
+      [3, 'AI không chắc (vùng xám 0,35–0,65)', 'Đưa ca lên đầu danh sách, yêu cầu bác sĩ đọc', ['Ứng dụng']],
+      [4, 'Ảnh chất lượng thấp', 'Đề nghị nơi gửi chụp lại hoặc gửi DICOM gốc', ['Ứng dụng', 'Tin nhắn OTT']],
+      [5, 'Trạm mất kết nối quá 10 phút', 'Báo kỹ thuật viên CNTT cụm', ['Email', 'Ứng dụng']],
+      [6, 'Sai lệch hiệu năng AI vượt ngưỡng giám sát', 'Báo nhóm AI và hội đồng chuyên môn, cân nhắc chuyển chế độ im lặng', ['Email', 'Ứng dụng']]
+    ];
+    const rules = R.map(r => { const on = !s.off[r[0]]; return { t: r[1], d: r[2], ch: r[3], on, bg: on ? '#2FA3C2' : '#3A4757', x: on ? 23 : 3, toggle: () => this.setState({ off: { ...this.state.off, [r[0]]: on } }) }; });
+    return {
+      nav: this.navVals('Alerts'), alerts, rules,
+      openCount: String(A.filter(a => !s.acked[a[0]]).length),
+      esc: [
+        { n: '0′', t: 'BS trực CĐHA + ngoại thần kinh', d: 'Ứng dụng di động, SMS, cuộc gọi tự động' },
+        { n: '5′', t: 'Trưởng kíp trực', d: 'Nếu chưa ai xác nhận' },
+        { n: '10′', t: 'Điều phối tỉnh', d: 'Chủ động liên hệ nơi gửi' },
+        { n: '15′', t: 'Hội chẩn tuyến cuối', d: 'Mở phiên hội chẩn khẩn với Chợ Rẫy' }
+      ],
+      roster: [
+        { role: 'CĐHA', site: 'BV tỉnh', name: 'BS. H.A.', shift: '19:00–07:00', ph: '09•• ••• 112', st: 'Đang trực', cls: 'grn' },
+        { role: 'CĐHA (dự phòng)', site: 'BV tỉnh', name: 'BS. T.M.', shift: '19:00–07:00', ph: '09•• ••• 245', st: 'Đang trực', cls: 'grn' },
+        { role: 'Ngoại thần kinh', site: 'BV tỉnh', name: 'BS. P.K.', shift: '17:00–07:00', ph: '09•• ••• 378', st: 'Đang mổ', cls: 'amb' },
+        { role: 'Điều phối', site: 'BV tỉnh', name: 'ĐD. L.T.', shift: '19:00–07:00', ph: '09•• ••• 401', st: 'Đang trực', cls: 'grn' },
+        { role: 'Ngoại thần kinh (tuyến cuối)', site: 'BV Chợ Rẫy', name: 'Theo lịch trung tâm hội chẩn', shift: '24/7', ph: '—', st: 'Kết nối', cls: 'blu' }
+      ]
+    };
+  }
+}
+DC.mount(Component);
+</script>
+</body>
+</html>

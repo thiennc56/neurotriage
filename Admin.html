@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản trị hệ thống · NeuroTriage</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0F14}
+a{color:#4CC3E0}a:hover{color:#8DDCEE}
+.app{font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#E7EDF4;background:#0B0F14;font-size:14px;line-height:1.45;min-height:100vh;display:flex;flex-wrap:wrap}
+.side{flex:1 1 236px;background:#0F141B;border-right:1px solid #1F2935;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8796AA;padding:14px 12px 4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#A9B6C7;text-decoration:none;font-size:13.5px;min-height:24px}
+.nav:hover{background:#18202A;color:#E7EDF4}
+.nav.on{background:#14313B;color:#E7EDF4;font-weight:600}
+.num{font-size:11px;color:#8796AA;min-width:24px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid #1F2935;background:#0F141B}
+.body{padding:24px 28px 40px;display:flex;flex-direction:column;gap:20px}
+.card{background:#121820;border:1px solid #1F2935;border-radius:12px;padding:18px;min-width:0}
+.h{font-size:14px;font-weight:600;color:#E7EDF4;margin:0 0 12px}
+.lbl{font-size:12px;color:#93A3B8}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex:none}
+.red{background:#3A1719;color:#FF8A8A}.amb{background:#3A2C10;color:#F7C25E}.grn{background:#0F3020;color:#5FD39A}.blu{background:#10303A;color:#6FD3EA}.gry{background:#1E2733;color:#B4C0CF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid #2A3646;background:#18202A;color:#E7EDF4;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn:hover{background:#202B38;color:#E7EDF4}
+.btn.pri{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.in{width:100%;box-sizing:border-box;min-height:44px;padding:8px 12px;border-radius:8px;border:1px solid #2A3646;background:#0E141B;color:#E7EDF4;font:inherit}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:600;color:#93A3B8;font-size:12px;padding:8px 10px;border-bottom:1px solid #1F2935;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #18202A;vertical-align:middle}
+.scroll{overflow-x:auto}
+.tab{min-height:44px;padding:0 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:#A9B6C7;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.tab.sel{background:#14313B;border-color:#24505E;color:#E7EDF4}
+.mx{text-align:center;font-weight:700}
+</style>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-template">
+
+<div class="app">
+<aside class="side" aria-label="Phân hệ">
+<div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">
+<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4CC3E0"></rect><path d="M7 17h5l2.5-6 3.5 11 2.5-5H25" stroke="#06232B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-weight:700;font-size:15px">NeuroTriage</div><div class="lbl">AI hỗ trợ chấn thương sọ não</div></div>
+</div>
+<nav style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{nav}}" as="n" hint-placeholder-count="20">
+<template data-sc="if" value="{{n.head}}" hint-placeholder-val="{{false}}"><div class="grp">{{n.t}}</div></template>
+<template data-sc="if" value="{{n.link}}" hint-placeholder-val="{{true}}"><a class="nav {{n.cls}}" href="{{n.href}}" aria-current="{{n.cur}}"><span class="mono num">{{n.num}}</span>{{n.t}}</a></template>
+</template>
+</nav>
+</aside>
+<main class="main">
+<header class="top">
+<div style="flex:1 1 320px;min-width:0"><div class="lbl">Quản lý · 12</div><h1 style="margin:2px 0 0;font-size:20px;font-weight:700">Quản trị hệ thống</h1></div>
+<span class="chip amb">Dữ liệu mô phỏng</span>
+<button type="button" class="btn pri">Thêm người dùng</button>
+</header>
+<div class="body">
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+<div class="card" style="padding:16px"><div class="lbl">Người dùng hoạt động</div><div class="mono" style="font-size:26px;font-weight:600">186</div><div class="lbl">trên 21 cơ sở</div></div>
+<div class="card" style="padding:16px"><div class="lbl">Cơ sở kết nối</div><div class="mono" style="font-size:26px;font-weight:600">21</div><div class="lbl">14 trạm · 3 TTYT · 3 BV · 1 tuyến cuối</div></div>
+<div class="card" style="padding:16px"><div class="lbl">Bật xác thực 2 lớp</div><div class="mono" style="font-size:26px;font-weight:600">97%</div><div class="lbl">6 tài khoản chưa bật</div></div>
+<div class="card" style="padding:16px"><div class="lbl">Lượt truy cập hồ sơ hôm nay</div><div class="mono" style="font-size:26px;font-weight:600">2 418</div><div class="lbl">đều được ghi nhật ký</div></div>
+</section>
+<section class="card" style="padding:0">
+<div style="display:flex;flex-wrap:wrap;gap:6px;padding:12px;border-bottom:1px solid #1F2935" role="tablist" aria-label="Mục quản trị">
+<template data-sc="for" list="{{tabs}}" as="t" hint-placeholder-count="5"><button type="button" role="tab" class="tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.t}}</button></template>
+</div>
+<div style="padding:18px">
+<template data-sc="if" value="{{tab0}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px"><label style="flex:1 1 260px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tìm người dùng</span><input class="in" type="search" placeholder="Tìm theo tên, email, cơ sở…"></label><span class="chip gry" style="align-self:center">Vai trò: tất cả</span></div>
+<div class="scroll"><table>
+<thead><tr><th>Người dùng</th><th>Vai trò</th><th>Cơ sở</th><th>Chứng chỉ hành nghề</th><th>Xác thực 2 lớp</th><th>Lần cuối</th><th>Trạng thái</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{users}}" as="u" hint-placeholder-count="6">
+<tr><td><div style="display:flex;gap:10px;align-items:center"><div style="width:32px;height:32px;border-radius:50%;background:#1E2733;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">{{u.i}}</div><div><div style="font-weight:600">{{u.n}}</div><div class="lbl">{{u.e}}</div></div></div></td><td>{{u.r}}</td><td>{{u.s}}</td><td class="mono" style="font-size:12px">{{u.cc}}</td><td><span class="chip {{u.c2}}">{{u.tf}}</span></td><td class="mono lbl">{{u.l}}</td><td><span class="chip {{u.c3}}">{{u.st}}</span></td></tr>
+</template>
+</tbody></table></div>
+</template>
+<template data-sc="if" value="{{tab1}}" hint-placeholder-val="{{false}}">
+<div class="scroll"><table>
+<thead><tr><th>Vai trò</th><template data-sc="for" list="{{mods}}" as="m" hint-placeholder-count="9"><th class="mx" style="white-space:normal;min-width:72px">{{m}}</th></template></thead>
+<tbody>
+<template data-sc="for" list="{{matrix}}" as="r" hint-placeholder-count="6">
+<tr><td style="font-weight:600;white-space:nowrap">{{r.role}}</td><template data-sc="for" list="{{r.cells}}" as="c" hint-placeholder-count="9"><td class="mx" style="color:{{c.c}}">{{c.v}}</td></template></tr>
+</template>
+</tbody></table></div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px" class="lbl"><span><b style="color:#5FD39A">Ghi</b>: xem và thao tác</span><span><b style="color:#6FD3EA">Xem</b>: chỉ xem</span><span><b style="color:#8796AA">—</b>: không có quyền</span><span>Bác sĩ chỉ xem được ca của cơ sở mình và ca được gửi hội chẩn tới mình.</span></div>
+</template>
+<template data-sc="if" value="{{tab2}}" hint-placeholder-val="{{false}}">
+<div class="scroll"><table>
+<thead><tr><th>Cơ sở</th><th>Tuyến</th><th>Thiết bị hình ảnh</th><th>Tầng AI dùng được</th><th>Gửi hội chẩn tới</th><th>Trạng thái</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{sites}}" as="s" hint-placeholder-count="5">
+<tr><td style="font-weight:600">{{s.n}}</td><td>{{s.t}}</td><td>{{s.eq}}</td><td><span class="chip blu mono">{{s.ai}}</span></td><td>{{s.to}}</td><td><span class="chip {{s.cls}}">{{s.st}}</span></td></tr>
+</template>
+</tbody></table></div>
+</template>
+<template data-sc="if" value="{{tab3}}" hint-placeholder-val="{{false}}">
+<div class="scroll"><table>
+<thead><tr><th>Thời gian</th><th>Người dùng</th><th>Hành động</th><th>Đối tượng</th><th>Phiên bản mô hình</th><th>IP / thiết bị</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{audit}}" as="a" hint-placeholder-count="6">
+<tr><td class="mono">{{a.t}}</td><td>{{a.u}}</td><td>{{a.a}}</td><td class="mono" style="font-size:12px">{{a.o}}</td><td class="mono" style="font-size:12px">{{a.m}}</td><td class="mono lbl">{{a.ip}}</td></tr>
+</template>
+</tbody></table></div>
+<p class="lbl" style="margin:12px 0 0">Nhật ký không sửa, không xóa được; lưu tối thiểu theo quy định lưu trữ hồ sơ bệnh án.</p>
+</template>
+<template data-sc="if" value="{{tab4}}" hint-placeholder-val="{{false}}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+<template data-sc="for" list="{{sec}}" as="x" hint-placeholder-count="6">
+<div class="card" style="background:#0E141B"><div style="display:flex;gap:8px;align-items:center"><span style="font-weight:600;flex:1">{{x.t}}</span><span class="chip {{x.cls}}">{{x.st}}</span></div><div class="lbl" style="margin-top:6px">{{x.d}}</div></div>
+</template>
+</div>
+</template>
+</div>
+</section>
+</div>
+</main>
+</div>
+</template>
+<script src="assets/dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 0 }; }
+  navVals(cur) {
+    const N = [['h','Lâm sàng'],['01','Tổng quan','Main'],['02','Tiếp nhận & sàng lọc','Intake'],['03','Danh sách ca đọc','Worklist'],['04','Đọc phim DICOM','Viewer'],['05','Phân tầng nguy cơ AI','Risk'],['06','Kết quả & báo cáo','Report'],['h','Phối hợp tuyến'],['07','Hội chẩn từ xa','Consult'],['08','Chuyển tuyến','Referral'],['09','Liên thông HIS/PACS','Integration'],['09b','Cấu hình liên thông','IntegrationConfig'],['10','Cảnh báo & trực','Alerts'],['h','Quản lý'],['11','Thống kê & chất lượng','Analytics'],['12','Quản trị hệ thống','Admin'],['h','AI Studio'],['13a','Dữ liệu & gán nhãn','Labeling'],['13b','Huấn luyện & đánh giá','Training'],['13c','Cấu hình mô hình AI','ModelConfig']];
+    return N.map(n => n[0] === 'h' ? { head: true, link: false, t: n[1] } : { head: false, link: true, num: n[0], t: n[1], href: n[2] + '.html', cls: n[2] === cur ? 'on' : '', cur: n[2] === cur ? 'page' : undefined });
+  }
+  renderVals() {
+    const t = this.state.tab;
+    const T = ['Người dùng', 'Phân quyền theo vai trò', 'Cơ sở & tuyến', 'Nhật ký kiểm toán', 'Bảo mật & tuân thủ'];
+    const mods = ['Tiếp nhận', 'Đọc phim', 'Phân tầng', 'Báo cáo', 'Hội chẩn', 'Chuyển tuyến', 'Liên thông', 'Thống kê', 'AI Studio'];
+    const M = [
+      ['BS trạm y tế xã', 'GVGVGG-V-'],
+      ['BS chẩn đoán hình ảnh', 'XGGGGVVV-'],
+      ['BS ngoại thần kinh', 'VGGVGGVV-'],
+      ['Điều phối tuyến', 'VVVVGGVG-'],
+      ['Kỹ sư AI / dữ liệu', '--------G'],
+      ['Quản trị hệ thống', '------GGV']
+    ];
+    const C = { G: ['Ghi', '#5FD39A'], V: ['Xem', '#6FD3EA'], X: ['Xem', '#6FD3EA'], '-': ['—', '#5B6B80'] };
+    return {
+      nav: this.navVals('Admin'),
+      tab0: t === 0, tab1: t === 1, tab2: t === 2, tab3: t === 3, tab4: t === 4,
+      tabs: T.map((x, i) => ({ t: x, sel: t === i, cls: t === i ? 'sel' : '', pick: () => this.setState({ tab: i }) })),
+      mods,
+      matrix: M.map(r => ({ role: r[0], cells: r[1].split('').map(ch => ({ v: C[ch][0], c: C[ch][1] })) })),
+      users: [
+        { i: 'HA', n: 'BS. [Họ tên]', e: 'ha@[bv].vn', r: 'BS chẩn đoán hình ảnh', s: 'BV tỉnh', cc: 'CCHN ••••12', tf: 'Đã bật', c2: 'grn', l: '19:52', st: 'Hoạt động', c3: 'grn' },
+        { i: 'PK', n: 'BS. [Họ tên]', e: 'pk@[bv].vn', r: 'BS ngoại thần kinh', s: 'BV tỉnh', cc: 'CCHN ••••48', tf: 'Đã bật', c2: 'grn', l: '19:47', st: 'Hoạt động', c3: 'grn' },
+        { i: 'BS', n: 'BS. [Họ tên]', e: 'bs@[tyt].vn', r: 'BS trạm y tế xã', s: 'TYT xã [B]', cc: 'CCHN ••••03', tf: 'Đã bật', c2: 'grn', l: '19:05', st: 'Hoạt động', c3: 'grn' },
+        { i: 'LT', n: 'ĐD. [Họ tên]', e: 'lt@[bv].vn', r: 'Điều phối tuyến', s: 'BV tỉnh', cc: '—', tf: 'Đã bật', c2: 'grn', l: '19:50', st: 'Hoạt động', c3: 'grn' },
+        { i: 'KS', n: '[Họ tên]', e: 'ai@[dv].vn', r: 'Kỹ sư AI', s: 'Nhóm nghiên cứu', cc: '—', tf: 'Đã bật', c2: 'grn', l: 'hôm qua', st: 'Hoạt động', c3: 'grn' },
+        { i: 'NV', n: 'BS. [Họ tên]', e: 'nv@[tyt].vn', r: 'BS trạm y tế xã', s: 'TYT xã [E]', cc: 'CCHN ••••77', tf: 'Chưa bật', c2: 'amb', l: '12 ngày', st: 'Chờ kích hoạt', c3: 'gry' }
+      ],
+      sites: [
+        { n: 'TYT xã [B]', t: 'Ban đầu', eq: 'X-quang kỹ thuật số', ai: 'T1 · T2', to: 'TTYT KV [A]', st: 'Trực tuyến', cls: 'grn' },
+        { n: 'TYT xã [E]', t: 'Ban đầu', eq: 'Không có', ai: 'T1', to: 'TTYT KV [A]', st: 'Mất kết nối', cls: 'amb' },
+        { n: 'TTYT khu vực [A]', t: 'Cơ bản', eq: 'CT 16 dãy · X-quang', ai: 'T1 · T2 · T3', to: 'BV tỉnh', st: 'Trực tuyến', cls: 'grn' },
+        { n: 'BV đa khoa tỉnh', t: 'Cơ bản', eq: 'CT 64 dãy · MRI', ai: 'T1 · T2 · T3', to: 'BV Chợ Rẫy', st: 'Trực tuyến', cls: 'grn' },
+        { n: 'BV Chợ Rẫy', t: 'Chuyên sâu', eq: 'Đầy đủ', ai: 'Nhận hội chẩn', to: '—', st: 'Kết nối', cls: 'blu' }
+      ],
+      audit: [
+        { t: '19:52:07', u: 'BS. H.A.', a: 'Ký số báo cáo', o: 'CT-2611-0142', m: 'T3 v1.3', ip: '10.2.4.18' },
+        { t: '19:51:40', u: 'BS. H.A.', a: 'Sửa kết quả AI (XH dưới nhện)', o: 'CT-2611-0142', m: 'T3 v1.3', ip: '10.2.4.18' },
+        { t: '19:43:12', u: 'Hệ thống', a: 'Chạy suy luận AI', o: 'CT-2611-0142', m: 'T3 v1.3 · 21 ms', ip: 'gpu-01' },
+        { t: '19:05:44', u: 'Hệ thống', a: 'Chạy suy luận AI (im lặng)', o: 'XQ-2611-0139', m: 'T2 v0.4', ip: 'gpu-01' },
+        { t: '19:02:10', u: 'BS. [TYT xã B]', a: 'Tạo phiếu T1', o: 'LS-2611-0141', m: 'T1 v0.9', ip: 'máy tính bảng' },
+        { t: '18:30:02', u: 'Kỹ sư AI', a: 'Xem tập dữ liệu ẩn danh', o: 'DS-CR-2021-25', m: '—', ip: '10.9.1.4' }
+      ],
+      sec: [
+        { t: 'Nghị định 13/2023/NĐ-CP', st: 'Đã đánh giá', cls: 'grn', d: 'Hồ sơ đánh giá tác động xử lý dữ liệu cá nhân, đồng ý của người bệnh.' },
+        { t: 'Mã hóa', st: 'Bật', cls: 'grn', d: 'TLS 1.3 khi truyền; mã hóa ổ đĩa khi lưu.' },
+        { t: 'Xác thực', st: 'Bật', cls: 'grn', d: 'Đăng nhập một lần qua HIS, xác thực 2 lớp bắt buộc với tài khoản ngoài bệnh viện.' },
+        { t: 'Hội đồng đạo đức', st: 'Đã duyệt', cls: 'grn', d: 'Quyết định số [SỐ QĐ] cho giai đoạn nghiên cứu.' },
+        { t: 'Phần mềm là thiết bị y tế', st: 'Đang chuẩn bị', cls: 'amb', d: 'Hồ sơ chất lượng ISO 13485, vòng đời phần mềm IEC 62304.' },
+        { t: 'Sao lưu & khôi phục', st: 'Hằng ngày', cls: 'grn', d: 'Bản sao tại trung tâm dữ liệu thứ hai trong nước.' }
+      ]
+    };
+  }
+}
+DC.mount(Component);
+</script>
+</body>
+</html>

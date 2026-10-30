@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đọc phim DICOM có AI · NeuroTriage</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0F14}
+a{color:#4CC3E0}a:hover{color:#8DDCEE}
+.app{font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#E7EDF4;background:#0B0F14;font-size:14px;line-height:1.45;min-height:100vh;display:flex;flex-wrap:wrap}
+.side{flex:1 1 236px;background:#0F141B;border-right:1px solid #1F2935;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8796AA;padding:14px 12px 4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#A9B6C7;text-decoration:none;font-size:13.5px;min-height:24px}
+.nav:hover{background:#18202A;color:#E7EDF4}
+.nav.on{background:#14313B;color:#E7EDF4;font-weight:600}
+.num{font-size:11px;color:#8796AA;min-width:24px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid #1F2935;background:#0F141B}
+.card{background:#121820;border:1px solid #1F2935;border-radius:12px;padding:16px;min-width:0}
+.h{font-size:14px;font-weight:600;color:#E7EDF4;margin:0 0 12px}
+.lbl{font-size:12px;color:#93A3B8}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex:none}
+.red{background:#3A1719;color:#FF8A8A}.amb{background:#3A2C10;color:#F7C25E}.grn{background:#0F3020;color:#5FD39A}.blu{background:#10303A;color:#6FD3EA}.gry{background:#1E2733;color:#B4C0CF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid #2A3646;background:#18202A;color:#E7EDF4;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn:hover{background:#202B38;color:#E7EDF4}
+.btn.pri{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.tool{min-height:44px;padding:0 12px;border-radius:8px;border:1px solid #232E3C;background:#121820;color:#C9D4E1;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.tool.sel{background:#14313B;border-color:#2C6E80;color:#E7EDF4}
+.ov{position:absolute;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#D9E2EC;line-height:1.5;text-shadow:0 1px 2px #000}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.sw{display:flex;align-items:center;gap:10px;cursor:pointer;min-height:44px}
+.sw input{width:18px;height:18px;accent-color:#4CC3E0;margin:0}
+.thumb{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:10px;border:1px solid #1F2935;background:#0E141B;text-decoration:none;color:#C9D4E1}
+.thumb.sel{border-color:#4CC3E0}
+</style>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-template">
+
+<div class="app">
+<aside class="side" aria-label="Phân hệ">
+<div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">
+<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4CC3E0"></rect><path d="M7 17h5l2.5-6 3.5 11 2.5-5H25" stroke="#06232B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-weight:700;font-size:15px">NeuroTriage</div><div class="lbl">AI hỗ trợ chấn thương sọ não</div></div>
+</div>
+<nav style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{nav}}" as="n" hint-placeholder-count="20">
+<template data-sc="if" value="{{n.head}}" hint-placeholder-val="{{false}}"><div class="grp">{{n.t}}</div></template>
+<template data-sc="if" value="{{n.link}}" hint-placeholder-val="{{true}}"><a class="nav {{n.cls}}" href="{{n.href}}" aria-current="{{n.cur}}"><span class="mono num">{{n.num}}</span>{{n.t}}</a></template>
+</template>
+</nav>
+</aside>
+<main class="main">
+<header class="top">
+<div style="flex:1 1 320px;min-width:0"><div class="lbl">Lâm sàng · 04 · CT-2611-0142 · Nam, 34 tuổi · TTYT khu vực [A]</div><h1 style="margin:2px 0 0;font-size:20px;font-weight:700">Đọc phim CT sọ não không cản quang</h1></div>
+<span class="chip amb">Ảnh minh họa · dữ liệu mô phỏng</span>
+<span class="chip red">AI: mức Đỏ</span>
+<a class="btn" href="Worklist.html">Ca trước</a>
+<a class="btn" href="Worklist.html">Ca sau</a>
+</header>
+<div style="display:flex;flex-wrap:wrap;gap:16px;padding:16px 20px 32px;align-items:flex-start">
+<nav style="flex:1 1 150px;max-width:190px;display:flex;flex-direction:column;gap:10px" aria-label="Chuỗi ảnh">
+<div class="lbl" style="font-weight:600">Chuỗi ảnh (4)</div>
+<template data-sc="for" list="{{series}}" as="s" hint-placeholder-count="4">
+<a class="thumb {{s.cls}}" href="#vp">
+<div style="height:82px;border-radius:6px;background:#000;display:flex;align-items:center;justify-content:center"><div style="width:52px;height:62px;border-radius:50%;border:4px solid #CFCFCF;background:{{s.bg}}"></div></div>
+<div style="font-size:12.5px;font-weight:600">{{s.t}}</div><div class="lbl">{{s.d}}</div>
+</a>
+</template>
+<div class="card" style="padding:10px"><div class="lbl">Phim cũ</div><div style="font-size:12.5px;margin-top:4px">Không có trong PACS cụm</div></div>
+</nav>
+<section id="vp" style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:10px" aria-label="Khung xem ảnh">
+<div style="display:flex;flex-wrap:wrap;gap:6px" role="toolbar" aria-label="Công cụ xem ảnh">
+<template data-sc="for" list="{{tools}}" as="t" hint-placeholder-count="9"><button type="button" class="tool {{t.cls}}" aria-pressed="{{t.sel}}" onClick="{{t.pick}}">{{t.t}}</button></template>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+<span class="lbl" style="margin-right:4px">Cửa sổ</span>
+<template data-sc="for" list="{{presets}}" as="p" hint-placeholder-count="4"><button type="button" class="tool {{p.cls}}" aria-pressed="{{p.sel}}" onClick="{{p.pick}}">{{p.t}} <span class="mono" style="color:#93A3B8">{{p.wl}}</span></button></template>
+</div>
+<div style="position:relative;background:#000;border-radius:12px;border:1px solid #1F2935;overflow:hidden;aspect-ratio:1/1;max-height:640px;width:100%;max-width:640px;align-self:center">
+<div style="position:absolute;inset:0;filter:{{flt}}">
+<svg viewBox="0 0 400 400" role="img" aria-label="Ảnh CT sọ não minh họa, lát cắt ngang" style="width:100%;height:100%;display:block">
+<rect width="400" height="400" fill="#000"></rect>
+<ellipse cx="200" cy="205" rx="150" ry="178" fill="#151515" stroke="#ECECEC" stroke-width="13"></ellipse>
+<ellipse cx="200" cy="205" rx="138" ry="166" fill="#6a6a6a"></ellipse>
+<ellipse cx="208" cy="205" rx="112" ry="142" fill="#767676"></ellipse>
+<path d="M190 150 C172 172 174 212 192 240 L200 236 C188 210 188 176 200 156 Z" fill="#2a2a2a"></path>
+<path d="M226 148 C250 168 252 214 232 244 L220 238 C236 210 236 176 218 154 Z" fill="#2a2a2a"></path>
+<path d="M200 42 Q216 205 202 368" stroke="#9c9c9c" stroke-width="2" fill="none"></path>
+<path d="M90 80 Q48 205 92 330 Q74 205 104 86 Z" fill="#d8d8d8"></path>
+<ellipse cx="200" cy="205" rx="157" ry="185" fill="none" stroke="#3a3a3a" stroke-width="2"></ellipse>
+</svg>
+</div>
+<template data-sc="if" value="{{showHeat}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+<defs><radialGradient id="hm"><stop offset="0" stop-color="#ff3b1f" stop-opacity=".75"></stop><stop offset=".45" stop-color="#ffb31f" stop-opacity=".45"></stop><stop offset="1" stop-color="#ffd21f" stop-opacity="0"></stop></radialGradient></defs>
+<ellipse cx="84" cy="205" rx="62" ry="120" fill="url(#hm)"></ellipse>
+</svg>
+</template>
+<template data-sc="if" value="{{showSeg}}" hint-placeholder-val="{{true}}">
+<svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+<path d="M90 80 Q48 205 92 330 Q74 205 104 86 Z" fill="#F26B6B" fill-opacity=".38" stroke="#FF6B6B" stroke-width="2"></path>
+<line x1="200" y1="40" x2="200" y2="370" stroke="#4CC3E0" stroke-width="1.5" stroke-dasharray="6 5"></line>
+<line x1="200" y1="205" x2="212" y2="205" stroke="#4CC3E0" stroke-width="3"></line>
+<line x1="60" y1="205" x2="88" y2="205" stroke="#F7C25E" stroke-width="2"></line>
+</svg>
+<div class="ov" style="left:4%;top:55%;color:#FF9B9B">SDH 38 ml</div>
+<div class="ov" style="left:54%;top:47%;color:#7FDDF0">Lệch 6,2 mm</div>
+</template>
+<div class="ov" style="left:12px;top:10px">CT-2611-0142 · Nam 34t<br>Không cản quang · 5 mm<br>[Hãng máy CT] 16 dãy</div>
+<div class="ov" style="right:12px;top:10px;text-align:right">Lát {{slice}}/32<br>{{wlText}}<br>Phóng 1,0×</div>
+<div class="ov" style="left:12px;bottom:10px">AI T3 v1.3 · {{ovText}}</div>
+<div class="ov" style="right:12px;bottom:10px;text-align:right">P ⟷ T<br>━━━ 5 cm</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;max-width:640px;width:100%;align-self:center">
+<label class="lbl" for="sl" style="white-space:nowrap">Lát cắt</label>
+<input id="sl" type="range" min="1" max="32" value="{{slice}}" onChange="{{onSlice}}" style="flex:1;accent-color:#4CC3E0;min-height:44px">
+<span class="mono" style="font-size:12px;min-width:56px;text-align:right">{{slice}} / 32</span>
+</div>
+<div style="max-width:640px;width:100%;align-self:center;display:flex;gap:2px;height:10px" aria-hidden="true">
+<template data-sc="for" list="{{strip}}" as="x" hint-placeholder-count="32"><div style="flex:1;border-radius:2px;background:{{x.c}}"></div></template>
+</div>
+<div class="lbl" style="max-width:640px;width:100%;align-self:center">Dải màu: lát có phát hiện của AI (đỏ: máu tụ, vàng: vùng xám). Lớp phủ chỉ hiện ở các lát 12–24.</div>
+</section>
+<aside style="flex:1 1 320px;max-width:400px;min-width:0;display:flex;flex-direction:column;gap:14px" aria-label="Kết quả AI">
+<section class="card">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><h2 class="h" style="margin:0;flex:1">Lớp hiển thị</h2><span class="chip gry mono">T3 · v1.3</span></div>
+<label class="sw"><input type="checkbox" checked="{{seg}}" onChange="{{tSeg}}"><span>Vùng máu tụ & đường giữa</span></label>
+<label class="sw"><input type="checkbox" checked="{{heat}}" onChange="{{tHeat}}"><span>Bản đồ nhiệt Grad-CAM (giải thích)</span></label>
+</section>
+<section class="card">
+<h2 class="h">Phát hiện của AI</h2>
+<div style="display:flex;flex-direction:column;gap:10px">
+<template data-sc="for" list="{{finds}}" as="f" hint-placeholder-count="4">
+<div style="padding:10px 12px;border-radius:10px;background:#0E141B;border:1px solid #1F2935">
+<div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:{{f.c}}"></span><span style="font-weight:600;font-size:13.5px;flex:1">{{f.t}}</span><span class="chip {{f.cls}} mono">{{f.p}}</span></div>
+<div class="lbl" style="margin-top:4px">{{f.d}}</div>
+</div>
+</template>
+</div>
+</section>
+<section class="card">
+<h2 class="h">5 loại xuất huyết (xác suất)</h2>
+<div style="display:flex;flex-direction:column;gap:8px">
+<template data-sc="for" list="{{types}}" as="t" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span style="flex:0 0 150px">{{t.t}}</span><div style="flex:1;height:8px;border-radius:4px;background:#1E2733;overflow:hidden;position:relative"><div style="width:{{t.w}}%;height:100%;background:{{t.c}}"></div></div><span class="mono" style="min-width:34px;text-align:right">{{t.p}}</span></div>
+</template>
+</div>
+<div style="display:flex;gap:6px;margin-top:10px;align-items:center" class="lbl"><span style="display:inline-block;width:24px;height:8px;background:#3A2C10;border:1px solid #6B5420;border-radius:2px"></span>Vùng xám 0,35–0,65: AI không chắc</div>
+</section>
+<section class="card" style="border-color:#4A3A16">
+<h2 class="h" style="color:#F7C25E">Điểm yếu đã biết của mô hình</h2>
+<ul style="margin:0;padding-left:18px;font-size:13px;display:flex;flex-direction:column;gap:4px">
+<li>Độ nhạy thấp hơn với xuất huyết dưới nhện</li>
+<li>Sai nhiều hơn ở người trên 70 tuổi và trẻ em</li>
+<li>Kiểm tra chất lượng ảnh: đạt · đầu lệch 7°</li>
+</ul>
+</section>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<a class="btn pri" style="flex:1" href="Risk.html">Xác nhận & phân tầng</a>
+<a class="btn" style="flex:1" href="Report.html">Sửa kết quả</a>
+<button type="button" class="btn" style="flex:1 1 100%">Bác bỏ kết quả AI (ghi lý do)</button>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</template>
+<script src="assets/dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { slice: 18, seg: true, heat: false, wl: 1, tool: 0 }; }
+  navVals(cur) {
+    const N = [['h','Lâm sàng'],['01','Tổng quan','Main'],['02','Tiếp nhận & sàng lọc','Intake'],['03','Danh sách ca đọc','Worklist'],['04','Đọc phim DICOM','Viewer'],['05','Phân tầng nguy cơ AI','Risk'],['06','Kết quả & báo cáo','Report'],['h','Phối hợp tuyến'],['07','Hội chẩn từ xa','Consult'],['08','Chuyển tuyến','Referral'],['09','Liên thông HIS/PACS','Integration'],['09b','Cấu hình liên thông','IntegrationConfig'],['10','Cảnh báo & trực','Alerts'],['h','Quản lý'],['11','Thống kê & chất lượng','Analytics'],['12','Quản trị hệ thống','Admin'],['h','AI Studio'],['13a','Dữ liệu & gán nhãn','Labeling'],['13b','Huấn luyện & đánh giá','Training'],['13c','Cấu hình mô hình AI','ModelConfig']];
+    return N.map(n => n[0] === 'h' ? { head: true, link: false, t: n[1] } : { head: false, link: true, num: n[0], t: n[1], href: n[2] + '.html', cls: n[2] === cur ? 'on' : '', cur: n[2] === cur ? 'page' : undefined });
+  }
+  renderVals() {
+    const s = this.state;
+    const inRange = s.slice >= 12 && s.slice <= 24;
+    const P = [['Não', 'W80 L40', 'none'], ['Máu tụ', 'W200 L80', 'contrast(1.35) brightness(1.05)'], ['Xương', 'W2800 L600', 'brightness(.55) contrast(2.2)'], ['Đột quỵ', 'W40 L40', 'contrast(1.8) brightness(.9)']];
+    const T = ['Cuộn', 'Phóng to', 'Di chuyển', 'W/L', 'Đo dài', 'Đo thể tích', 'Chú thích', 'MPR 3 mặt', 'So sánh phim cũ'];
+    const pct = v => v.toFixed(2).replace('.', ',');
+    const typ = [['Ngoài màng cứng (EDH)', 0.07], ['Dưới màng cứng (SDH)', 0.94], ['Dưới nhện (SAH)', 0.41], ['Trong nhu mô (IPH)', 0.18], ['Trong não thất (IVH)', 0.04]];
+    return {
+      nav: this.navVals('Viewer'),
+      slice: s.slice, seg: s.seg, heat: s.heat,
+      showSeg: s.seg && inRange, showHeat: s.heat && inRange,
+      onSlice: e => this.setState({ slice: +e.target.value }),
+      tSeg: () => this.setState({ seg: !this.state.seg }),
+      tHeat: () => this.setState({ heat: !this.state.heat }),
+      flt: P[s.wl][2], wlText: P[s.wl][1],
+      ovText: inRange ? (s.heat ? 'Grad-CAM bật' : 'phân đoạn bật') : 'không có phát hiện ở lát này',
+      presets: P.map((p, i) => ({ t: p[0], wl: p[1], sel: s.wl === i, cls: s.wl === i ? 'sel' : '', pick: () => this.setState({ wl: i }) })),
+      tools: T.map((t, i) => ({ t, sel: s.tool === i, cls: s.tool === i ? 'sel' : '', pick: () => this.setState({ tool: i }) })),
+      strip: Array.from({ length: 32 }, (_, i) => ({ c: i + 1 === s.slice ? '#E7EDF4' : (i + 1 >= 12 && i + 1 <= 24) ? '#B84348' : (i + 1 >= 26 && i + 1 <= 28) ? '#9A7424' : '#1E2733' })),
+      series: [
+        { t: 'CT 5 mm · nhu mô', d: '32 lát · đang xem', cls: 'sel', bg: '#6a6a6a' },
+        { t: 'CT 0,625 mm · xương', d: '248 lát', cls: '', bg: '#222' },
+        { t: 'Scout', d: '1 ảnh', cls: '', bg: '#444' },
+        { t: 'X-quang sọ nghiêng', d: 'TYT xã [B] · 1 ảnh', cls: '', bg: '#555' }
+      ],
+      finds: [
+        { t: 'Máu tụ dưới màng cứng bán cầu trái', p: '0,94', cls: 'red', c: '#F26B6B', d: 'Thể tích ước tính 38 ml · dày tối đa 14 mm · lát 12–24' },
+        { t: 'Lệch đường giữa sang phải', p: '6,2 mm', cls: 'red', c: '#F26B6B', d: 'Đo tự động tại lát 18, bác sĩ có thể kéo lại mốc' },
+        { t: 'Nghi xuất huyết dưới nhện', p: '0,41', cls: 'amb', c: '#F2B33D', d: 'Vùng xám · lát 26–28 · cần bác sĩ xem kỹ' },
+        { t: 'Vỡ xương sọ', p: '0,12', cls: 'gry', c: '#5B6B80', d: 'Không phát hiện trên cửa sổ xương' }
+      ],
+      types: typ.map(([t, v]) => ({ t, p: pct(v), w: Math.round(v * 100), c: v >= 0.65 ? '#F26B6B' : v >= 0.35 ? '#F2B33D' : '#3E5A70' }))
+    };
+  }
+}
+DC.mount(Component);
+</script>
+</body>
+</html>

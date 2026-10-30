@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiếp nhận và sàng lọc lâm sàng · NeuroTriage</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0F14}
+a{color:#4CC3E0}a:hover{color:#8DDCEE}
+.app{font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#E7EDF4;background:#0B0F14;font-size:14px;line-height:1.45;min-height:100vh;display:flex;flex-wrap:wrap}
+.side{flex:1 1 236px;background:#0F141B;border-right:1px solid #1F2935;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8796AA;padding:14px 12px 4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#A9B6C7;text-decoration:none;font-size:13.5px;min-height:24px}
+.nav:hover{background:#18202A;color:#E7EDF4}
+.nav.on{background:#14313B;color:#E7EDF4;font-weight:600}
+.num{font-size:11px;color:#8796AA;min-width:24px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid #1F2935;background:#0F141B}
+.body{padding:24px 28px 40px;display:flex;flex-direction:column;gap:20px}
+.card{background:#121820;border:1px solid #1F2935;border-radius:12px;padding:18px;min-width:0}
+.h{font-size:14px;font-weight:600;color:#E7EDF4;margin:0 0 12px}
+.lbl{font-size:12px;color:#93A3B8}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex:none}
+.red{background:#3A1719;color:#FF8A8A}.amb{background:#3A2C10;color:#F7C25E}.grn{background:#0F3020;color:#5FD39A}.blu{background:#10303A;color:#6FD3EA}.gry{background:#1E2733;color:#B4C0CF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid #2A3646;background:#18202A;color:#E7EDF4;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn:hover{background:#202B38;color:#E7EDF4}
+.btn.pri{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.btn.dng{background:#C62F35;border-color:#C62F35;color:#fff}
+.in{width:100%;box-sizing:border-box;min-height:44px;padding:8px 12px;border-radius:8px;border:1px solid #2A3646;background:#0E141B;color:#E7EDF4;font:inherit}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.fld{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:8px;background:#0E141B;border:1px solid #1F2935}
+.pill{min-width:44px;min-height:44px;border-radius:8px;border:1px solid #2A3646;background:#0E141B;color:#C9D4E1;font:inherit;font-weight:600;cursor:pointer}
+.pill.sel{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.chk{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid #1F2935;background:#0E141B;cursor:pointer;min-height:24px}
+.chk input{width:18px;height:18px;margin:1px 0 0;accent-color:#4CC3E0;flex:none}
+</style>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-template">
+
+<div class="app">
+<aside class="side" aria-label="Phân hệ">
+<div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">
+<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4CC3E0"></rect><path d="M7 17h5l2.5-6 3.5 11 2.5-5H25" stroke="#06232B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-weight:700;font-size:15px">NeuroTriage</div><div class="lbl">AI hỗ trợ chấn thương sọ não</div></div>
+</div>
+<nav style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{nav}}" as="n" hint-placeholder-count="20">
+<template data-sc="if" value="{{n.head}}" hint-placeholder-val="{{false}}"><div class="grp">{{n.t}}</div></template>
+<template data-sc="if" value="{{n.link}}" hint-placeholder-val="{{true}}"><a class="nav {{n.cls}}" href="{{n.href}}" aria-current="{{n.cur}}"><span class="mono num">{{n.num}}</span>{{n.t}}</a></template>
+</template>
+</nav>
+<div class="card" style="margin-top:20px;padding:12px;display:flex;gap:10px;align-items:center">
+<div style="width:36px;height:36px;border-radius:50%;background:#1E2733;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">BS</div>
+<div style="min-width:0"><div style="font-weight:600;font-size:13px">BS. [Họ tên]</div><div class="lbl">Bác sĩ · TYT xã [B]</div></div>
+</div>
+</aside>
+<main class="main">
+<header class="top">
+<div style="flex:1 1 300px;min-width:0"><div class="lbl">Lâm sàng · 02 · Tầng T1</div><h1 style="margin:2px 0 0;font-size:20px;font-weight:700">Tiếp nhận & sàng lọc chấn thương đầu</h1></div>
+<span class="chip amb">Dữ liệu mô phỏng</span>
+<span class="chip grn"><span class="dot" style="background:#5FD39A"></span>Chạy được khi mất mạng</span>
+<a class="btn" href="Worklist.html">Hủy</a>
+<a class="btn pri" href="Risk.html">Lưu & phân tầng</a>
+</header>
+<div class="body">
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px">
+<section class="card">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px"><h2 class="h" style="margin:0;flex:1">Thông tin hành chính</h2><span class="chip blu">Lấy tự động từ HIS · ServiceRequest #SR-88213</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+<div class="fld"><span class="lbl">Mã bệnh nhân</span><span class="mono">BN-2026-104 772</span></div>
+<div class="fld"><span class="lbl">Họ tên</span><span>Trần V. [ẩn danh]</span></div>
+<div class="fld"><span class="lbl">Tuổi · giới</span><span>34 · Nam</span></div>
+<div class="fld"><span class="lbl">Số thẻ BHYT</span><span class="mono">DN4 79 •••• 2231</span></div>
+<div class="fld"><span class="lbl">Giờ chấn thương</span><span class="mono">17:40 (cách 1 giờ 22 phút)</span></div>
+<div class="fld"><span class="lbl">Giờ tiếp nhận</span><span class="mono">19:02</span></div>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Cơ chế chấn thương</h2>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<template data-sc="for" list="{{mechs}}" as="m" hint-placeholder-count="5">
+<button type="button" class="pill {{m.cls}}" style="padding:0 14px" aria-pressed="{{m.sel}}" onClick="{{m.pick}}">{{m.t}}</button>
+</template>
+</div>
+</section>
+<section class="card">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:12px"><h2 class="h" style="margin:0;flex:1">Thang điểm Glasgow (GCS)</h2><span class="lbl">Tổng</span><span class="mono" style="font-size:26px;font-weight:600;color:{{gcsColor}}">{{gcs}}</span><span class="lbl">/ 15</span></div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<template data-sc="for" list="{{gcsRows}}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+<div style="flex:0 0 180px"><div style="font-weight:600;font-size:13.5px">{{g.t}}</div><div class="lbl">{{g.d}}</div></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap" role="group" aria-label="{{g.t}}">
+<template data-sc="for" list="{{g.opts}}" as="o" hint-placeholder-count="5"><button type="button" class="pill {{o.cls}}" aria-pressed="{{o.sel}}" onClick="{{o.pick}}">{{o.v}}</button></template>
+</div>
+</div>
+</template>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Dấu hiệu nguy cơ (Canadian CT Head Rule · PECARN cho trẻ em)</h2>
+<div style="display:flex;flex-direction:column;gap:16px">
+<template data-sc="for" list="{{groups}}" as="gr" hint-placeholder-count="3">
+<div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="dot" style="background:{{gr.c}}"></span><span style="font-weight:600;font-size:13px">{{gr.t}}</span><span class="lbl">{{gr.d}}</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px">
+<template data-sc="for" list="{{gr.items}}" as="c" hint-placeholder-count="3">
+<label class="chk"><input type="checkbox" checked="{{c.on}}" onChange="{{c.toggle}}"><span style="font-size:13.5px">{{c.t}}</span></label>
+</template>
+</div>
+</div>
+</template>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Sinh hiệu & khám thần kinh</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+<div class="fld"><span class="lbl">Huyết áp</span><span class="mono">135/85 mmHg</span></div>
+<div class="fld"><span class="lbl">Mạch</span><span class="mono">92 l/ph</span></div>
+<div class="fld"><span class="lbl">SpO₂</span><span class="mono">97 %</span></div>
+<div class="fld"><span class="lbl">Đồng tử P/T</span><span class="mono">3 mm / 3 mm · PXAS (+)</span></div>
+<div class="fld"><span class="lbl">Đường huyết mao mạch</span><span class="mono">6,1 mmol/L</span></div>
+</div>
+<label style="display:block;margin-top:12px"><span class="lbl">Ghi chú lâm sàng</span><textarea class="in" rows="3" style="margin-top:4px;resize:vertical" placeholder="Vết thương da đầu, bầm tím, hơi thở có mùi rượu…"></textarea></label>
+</section>
+</div>
+<aside style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:20px" aria-label="Kết quả sàng lọc">
+<section class="card" style="border-color:{{lvBorder}}">
+<div class="lbl">Kết quả tầng T1 · cập nhật trực tiếp</div>
+<div style="display:flex;align-items:center;gap:12px;margin:10px 0 6px">
+<div style="width:56px;height:56px;border-radius:14px;background:{{lvBg}};display:flex;align-items:center;justify-content:center"><span class="dot" style="width:22px;height:22px;background:{{lvColor}}"></span></div>
+<div><div style="font-size:24px;font-weight:700;color:{{lvColor}}">{{lvName}}</div><div class="lbl">{{lvSub}}</div></div>
+</div>
+<div style="font-weight:600;font-size:13px;margin:14px 0 6px">Lý do</div>
+<ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:13.5px">
+<template data-sc="for" list="{{reasons}}" as="r" hint-placeholder-count="2"><li>{{r}}</li></template>
+</ul>
+<div style="font-weight:600;font-size:13px;margin:16px 0 6px">Gợi ý xử trí</div>
+<p style="margin:0;font-size:13.5px">{{action}}</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+<a class="btn pri" href="Consult.html">Gửi hội chẩn</a>
+<a class="btn" href="Referral.html">Lập phiếu chuyển tuyến</a>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Ảnh kèm theo (tầng T2)</h2>
+<div style="border:1.5px dashed #2A3646;border-radius:10px;padding:22px;text-align:center">
+<div style="font-weight:600">Kéo thả DICOM hoặc chụp phim X-quang bằng điện thoại</div>
+<div class="lbl" style="margin-top:4px">Hệ thống tự kiểm tra chất lượng ảnh và ẩn danh trước khi gửi</div>
+<button type="button" class="btn" style="margin-top:12px">Chọn ảnh</button>
+</div>
+<p class="lbl" style="margin:12px 0 0;color:#F7C25E">X-quang sọ bình thường KHÔNG loại trừ máu tụ nội sọ. Kết quả T2 chỉ được nâng mức nguy cơ, không bao giờ hạ mức do T1 đưa ra.</p>
+</section>
+<section class="card">
+<h2 class="h">Quy tắc đang áp dụng</h2>
+<div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+<div style="display:flex;gap:8px"><span class="chip red">Đỏ</span><span>GCS &lt; 13, dấu hiệu khu trú, co giật, nghi lún sọ</span></div>
+<div style="display:flex;gap:8px"><span class="chip amb">Vàng</span><span>Nguy cơ trung bình theo CCHR, hoặc nhóm đặc biệt</span></div>
+<div style="display:flex;gap:8px"><span class="chip grn">Xanh</span><span>Nguy cơ thấp và không thuộc nhóm đặc biệt</span></div>
+</div>
+<p class="lbl" style="margin:12px 0 0">Ngưỡng dự thảo, chờ hội đồng chuyên môn thống nhất.</p>
+</section>
+</aside>
+</div>
+</div>
+</main>
+</div>
+</template>
+<script src="assets/dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { e: 4, v: 4, m: 6, mech: 0, on: { vomit: true, mech: true, alcohol: true } };
+  }
+  navVals(cur) {
+    const N = [['h','Lâm sàng'],['01','Tổng quan','Main'],['02','Tiếp nhận & sàng lọc','Intake'],['03','Danh sách ca đọc','Worklist'],['04','Đọc phim DICOM','Viewer'],['05','Phân tầng nguy cơ AI','Risk'],['06','Kết quả & báo cáo','Report'],['h','Phối hợp tuyến'],['07','Hội chẩn từ xa','Consult'],['08','Chuyển tuyến','Referral'],['09','Liên thông HIS/PACS','Integration'],['09b','Cấu hình liên thông','IntegrationConfig'],['10','Cảnh báo & trực','Alerts'],['h','Quản lý'],['11','Thống kê & chất lượng','Analytics'],['12','Quản trị hệ thống','Admin'],['h','AI Studio'],['13a','Dữ liệu & gán nhãn','Labeling'],['13b','Huấn luyện & đánh giá','Training'],['13c','Cấu hình mô hình AI','ModelConfig']];
+    return N.map(n => n[0] === 'h' ? { head: true, link: false, t: n[1] } : { head: false, link: true, num: n[0], t: n[1], href: n[2] + '.html', cls: n[2] === cur ? 'on' : '', cur: n[2] === cur ? 'page' : undefined });
+  }
+  renderVals() {
+    const s = this.state;
+    const defs = [
+      { t: 'Nguy cơ cao: chuyển ngay', d: '→ mức Đỏ', c: '#F26B6B', items: [['focal', 'Dấu hiệu thần kinh khu trú'], ['seizure', 'Co giật sau chấn thương'], ['depressed', 'Nghi vỡ sọ hở hoặc lún sọ']] },
+      { t: 'Nguy cơ trung bình: cần CT', d: '→ mức Vàng', c: '#F2B33D', items: [['basilar', 'Dấu hiệu vỡ nền sọ (máu sau màng nhĩ, mắt gấu trúc, chảy dịch mũi/tai)'], ['vomit', 'Nôn từ 2 lần trở lên'], ['amnesia', 'Quên ngược chiều ≥ 30 phút'], ['mech', 'Cơ chế nguy hiểm (xe máy tốc độ cao, ngã cao trên 1 m)'], ['loc', 'Có mất ý thức sau chấn thương']] },
+      { t: 'Nhóm đặc biệt', d: '→ không bao giờ xếp Xanh', c: '#4CC3E0', items: [['anticoag', 'Đang dùng thuốc chống đông / kháng kết tập'], ['age65', 'Tuổi từ 65 trở lên'], ['under2', 'Trẻ dưới 2 tuổi (chuyển sang PECARN)'], ['alcohol', 'Có uống rượu bia (khó đánh giá ý thức)']] }
+    ];
+    const toggle = (id) => () => this.setState({ on: { ...this.state.on, [id]: !this.state.on[id] } });
+    const groups = defs.map(g => ({ ...g, items: g.items.map(([id, t]) => ({ t, on: !!s.on[id], toggle: toggle(id) })) }));
+    const gcs = s.e + s.v + s.m;
+    const mk = (key, n) => Array.from({ length: n }, (_, i) => i + 1).reverse().map(v => ({ v: String(v), sel: s[key] === v, cls: s[key] === v ? 'sel' : '', pick: () => this.setState({ [key]: v }) }));
+    const gcsRows = [
+      { t: 'Mở mắt (E)', d: '4 tự nhiên → 1 không mở', opts: mk('e', 4) },
+      { t: 'Lời nói (V)', d: '5 định hướng → 1 không đáp', opts: mk('v', 5) },
+      { t: 'Vận động (M)', d: '6 làm theo lệnh → 1 không', opts: mk('m', 6) }
+    ];
+    const lab = { focal: 'Dấu hiệu thần kinh khu trú', seizure: 'Co giật', depressed: 'Nghi vỡ sọ hở / lún sọ', basilar: 'Dấu hiệu vỡ nền sọ', vomit: 'Nôn ≥ 2 lần', amnesia: 'Quên ngược chiều ≥ 30 phút', mech: 'Cơ chế nguy hiểm', loc: 'Mất ý thức', anticoag: 'Dùng thuốc chống đông', age65: 'Tuổi ≥ 65', under2: 'Trẻ dưới 2 tuổi', alcohol: 'Có uống rượu bia' };
+    const on = (k) => !!s.on[k];
+    const R = [], A = [], S = [];
+    if (gcs < 13) R.push('GCS ' + gcs + ' (dưới 13)');
+    ['focal', 'seizure', 'depressed'].forEach(k => on(k) && R.push(lab[k]));
+    if (gcs >= 13 && gcs < 15) A.push('GCS ' + gcs + ' (chưa đạt 15)');
+    ['basilar', 'vomit', 'amnesia', 'mech', 'loc'].forEach(k => on(k) && A.push(lab[k]));
+    ['anticoag', 'age65', 'under2', 'alcohol'].forEach(k => on(k) && S.push(lab[k] + ' (nhóm đặc biệt)'));
+    let lv = 'g';
+    if (R.length) lv = 'r'; else if (A.length || S.length) lv = 'a';
+    const L = {
+      r: { n: 'ĐỎ', sub: 'Nguy cơ cao', c: '#FF8A8A', bg: '#3A1719', b: '#7A2A2E', act: 'Gọi cấp cứu, chuyển ngay lên tuyến có phẫu thuật thần kinh. Hệ thống sẽ báo trước cho bệnh viện nhận và mở hội chẩn khẩn.' },
+      a: { n: 'VÀNG', sub: 'Nguy cơ trung bình', c: '#F7C25E', bg: '#3A2C10', b: '#6B5420', act: 'Chụp CT sọ não tại TTYT khu vực gần nhất trong vòng 1 giờ; gửi ảnh và phiếu này lên hội chẩn từ xa.' },
+      g: { n: 'XANH', sub: 'Nguy cơ thấp', c: '#5FD39A', bg: '#0F3020', b: '#1F5A3C', act: 'Theo dõi tại chỗ 24 giờ, phát phiếu hướng dẫn dấu hiệu cần quay lại. Hẹn liên lạc kiểm tra kết cục sau 7 ngày.' }
+    }[lv];
+    const reasons = (lv === 'r' ? R : []).concat(lv !== 'g' ? A : [], S);
+    const mechs = ['Tai nạn xe máy', 'Ngã', 'Va đập / bị đánh', 'Tai nạn lao động', 'Khác'].map((t, i) => ({ t, sel: s.mech === i, cls: s.mech === i ? 'sel' : '', pick: () => this.setState({ mech: i }) }));
+    return {
+      nav: this.navVals('Intake'), groups, gcsRows, mechs,
+      gcs: String(gcs), gcsColor: gcs < 13 ? '#FF8A8A' : gcs < 15 ? '#F7C25E' : '#5FD39A',
+      lvName: L.n, lvSub: L.sub, lvColor: L.c, lvBg: L.bg, lvBorder: L.b, action: L.act,
+      reasons: reasons.length ? reasons : ['GCS 15, không có dấu hiệu nguy cơ, không thuộc nhóm đặc biệt']
+    };
+  }
+}
+DC.mount(Component);
+</script>
+</body>
+</html>

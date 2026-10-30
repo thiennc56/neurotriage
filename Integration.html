@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liên thông HIS và PACS · NeuroTriage</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0F14}
+a{color:#4CC3E0}a:hover{color:#8DDCEE}
+.app{font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#E7EDF4;background:#0B0F14;font-size:14px;line-height:1.45;min-height:100vh;display:flex;flex-wrap:wrap}
+.side{flex:1 1 236px;background:#0F141B;border-right:1px solid #1F2935;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8796AA;padding:14px 12px 4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#A9B6C7;text-decoration:none;font-size:13.5px;min-height:24px}
+.nav:hover{background:#18202A;color:#E7EDF4}
+.nav.on{background:#14313B;color:#E7EDF4;font-weight:600}
+.num{font-size:11px;color:#8796AA;min-width:24px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid #1F2935;background:#0F141B}
+.body{padding:24px 28px 40px;display:flex;flex-direction:column;gap:20px}
+.card{background:#121820;border:1px solid #1F2935;border-radius:12px;padding:18px;min-width:0}
+.h{font-size:14px;font-weight:600;color:#E7EDF4;margin:0 0 12px}
+.lbl{font-size:12px;color:#93A3B8}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex:none}
+.red{background:#3A1719;color:#FF8A8A}.amb{background:#3A2C10;color:#F7C25E}.grn{background:#0F3020;color:#5FD39A}.blu{background:#10303A;color:#6FD3EA}.gry{background:#1E2733;color:#B4C0CF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid #2A3646;background:#18202A;color:#E7EDF4;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn:hover{background:#202B38;color:#E7EDF4}
+.btn.pri{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.in{width:100%;box-sizing:border-box;min-height:44px;padding:8px 12px;border-radius:8px;border:1px solid #2A3646;background:#0E141B;color:#E7EDF4;font:inherit}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:600;color:#93A3B8;font-size:12px;padding:8px 10px;border-bottom:1px solid #1F2935;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #18202A;vertical-align:middle}
+.scroll{overflow-x:auto}
+.tab{min-height:44px;padding:0 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:#A9B6C7;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.tab.sel{background:#14313B;border-color:#24505E;color:#E7EDF4}
+.code{font-family:'JetBrains Mono',monospace;font-size:12px;background:#0A0E13;border:1px solid #1F2935;border-radius:8px;padding:12px;white-space:pre-wrap;color:#C9D4E1;margin:0;overflow-x:auto}
+.node{padding:12px 14px;border-radius:10px;border:1px solid #2A3646;background:#0E141B;text-align:center;min-width:0}
+</style>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-template">
+
+<div class="app">
+<aside class="side" aria-label="Phân hệ">
+<div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">
+<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4CC3E0"></rect><path d="M7 17h5l2.5-6 3.5 11 2.5-5H25" stroke="#06232B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-weight:700;font-size:15px">NeuroTriage</div><div class="lbl">AI hỗ trợ chấn thương sọ não</div></div>
+</div>
+<nav style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{nav}}" as="n" hint-placeholder-count="20">
+<template data-sc="if" value="{{n.head}}" hint-placeholder-val="{{false}}"><div class="grp">{{n.t}}</div></template>
+<template data-sc="if" value="{{n.link}}" hint-placeholder-val="{{true}}"><a class="nav {{n.cls}}" href="{{n.href}}" aria-current="{{n.cur}}"><span class="mono num">{{n.num}}</span>{{n.t}}</a></template>
+</template>
+</nav>
+</aside>
+<main class="main">
+<header class="top">
+<div style="flex:1 1 320px;min-width:0"><div class="lbl">Phối hợp tuyến · 09</div><h1 style="margin:2px 0 0;font-size:20px;font-weight:700">Liên thông HIS / PACS / EMR</h1></div>
+<span class="chip amb">Dữ liệu mô phỏng</span>
+<button type="button" class="btn">Kiểm tra kết nối</button>
+<button type="button" class="btn pri">Thêm kết nối</button>
+</header>
+<div class="body">
+<section class="card">
+<h2 class="h">Kiến trúc tích hợp: cắm thêm, không thay HIS</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:center">
+<div class="node"><div style="font-weight:600">HIS bệnh viện</div><div class="lbl">Chỉ định, hành chính</div></div>
+<div class="node" style="border-style:dashed"><div class="mono" style="font-size:12px">HL7 v2 · FHIR R4 · REST</div><div class="lbl">Lớp adapter</div></div>
+<div class="node" style="border-color:#4CC3E0;background:#10262E"><div style="font-weight:700">NeuroTriage</div><div class="lbl">Worklist · AI · báo cáo</div></div>
+<div class="node" style="border-style:dashed"><div class="mono" style="font-size:12px">DICOM · DICOMweb</div><div class="lbl">Ảnh</div></div>
+<div class="node"><div style="font-weight:600">PACS / máy chụp</div><div class="lbl">CT, X-quang</div></div>
+</div>
+<p class="lbl" style="margin:12px 0 0">Bác sĩ bấm một nút trong HIS là mở đúng bệnh nhân trong NeuroTriage, không phải đăng nhập lại (SMART on FHIR / launch-in-context).</p>
+</section>
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px" aria-label="Các kết nối">
+<template data-sc="for" list="{{conns}}" as="c" hint-placeholder-count="6">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:{{c.c}};width:10px;height:10px"></span><span style="font-weight:600;flex:1">{{c.t}}</span><span class="chip {{c.cls}}">{{c.st}}</span></div>
+<div class="mono lbl">{{c.p}}</div>
+<div style="display:flex;justify-content:space-between;font-size:12.5px"><span class="lbl">Bản tin hôm nay</span><span class="mono">{{c.n}}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:12.5px"><span class="lbl">Độ trễ trung vị</span><span class="mono">{{c.l}}</span></div>
+</div>
+</template>
+</section>
+<section class="card" style="padding:0">
+<div style="display:flex;flex-wrap:wrap;gap:6px;padding:12px;border-bottom:1px solid #1F2935" role="tablist" aria-label="Chi tiết liên thông">
+<template data-sc="for" list="{{tabs}}" as="t" hint-placeholder-count="4"><button type="button" role="tab" class="tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.t}}</button></template>
+</div>
+<div style="padding:18px">
+<template data-sc="if" value="{{tab0}}" hint-placeholder-val="{{true}}">
+<div class="scroll"><table>
+<thead><tr><th>Thời gian</th><th>Chiều</th><th>Hệ thống</th><th>Loại bản tin</th><th>Mã ca</th><th>Trạng thái</th><th>Độ trễ</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{log}}" as="l" hint-placeholder-count="8">
+<tr><td class="mono">{{l.t}}</td><td>{{l.d}}</td><td>{{l.s}}</td><td class="mono" style="font-size:12px">{{l.m}}</td><td class="mono" style="font-size:12px">{{l.id}}</td><td><span class="chip {{l.cls}}">{{l.st}}</span></td><td class="mono">{{l.ms}}</td></tr>
+</template>
+</tbody></table></div>
+</template>
+<template data-sc="if" value="{{tab1}}" hint-placeholder-val="{{false}}">
+<div class="scroll"><table>
+<thead><tr><th>Mã dịch vụ HIS (ví dụ)</th><th>Tên trên HIS</th><th>Ánh xạ nội bộ</th><th>Luồng AI</th><th>Trạng thái</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{maps}}" as="m" hint-placeholder-count="5">
+<tr><td class="mono">{{m.a}}</td><td>{{m.b}}</td><td class="mono" style="font-size:12px">{{m.c}}</td><td>{{m.d}}</td><td><span class="chip {{m.cls}}">{{m.st}}</span></td></tr>
+</template>
+</tbody></table></div>
+</template>
+<template data-sc="if" value="{{tab2}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:10px">
+<label><span class="lbl">Mẫu URL mở trong ngữ cảnh</span><input class="in mono" style="font-size:12.5px;margin-top:4px" placeholder="https://[máy-chủ]/launch?iss={FHIR_BASE}&amp;patient={MA_BN}&amp;accession={ACCESSION}"></label>
+<label><span class="lbl">Client ID cấp cho HIS</span><input class="in mono" style="margin-top:4px" placeholder="[CLIENT_ID]"></label>
+<label><span class="lbl">Phạm vi quyền (scope)</span><input class="in mono" style="margin-top:4px" placeholder="launch patient/*.read user/DiagnosticReport.write"></label>
+</div>
+<pre class="code" style="flex:1 1 360px">// Nút trong HIS gọi:
+GET /launch?iss=https://his.[bv].vn/fhir
+    &amp;launch=abc123
+// NeuroTriage đổi mã lấy token,
+// đọc Patient + ServiceRequest,
+// mở thẳng màn hình 04 của ca đó.</pre>
+</div>
+</template>
+<template data-sc="if" value="{{tab3}}" hint-placeholder-val="{{false}}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+<div class="card" style="background:#0E141B"><div style="font-weight:600">Ẩn danh hóa tại chỗ</div><div class="lbl" style="margin-top:4px">Xóa tên, CCCD, ngày sinh khỏi thẻ DICOM trước khi ảnh rời bệnh viện; thay bằng mã ngẫu nhiên.</div><span class="chip grn" style="margin-top:10px">Đang bật</span></div>
+<div class="card" style="background:#0E141B"><div style="font-weight:600">Dữ liệu trong nước</div><div class="lbl" style="margin-top:4px">Máy chủ AI đặt tại BV tuyến cuối hoặc trung tâm dữ liệu Sở Y tế.</div><span class="chip grn" style="margin-top:10px">Tuân thủ</span></div>
+<div class="card" style="background:#0E141B"><div style="font-weight:600">Nhật ký suy luận</div><div class="lbl" style="margin-top:4px">Mỗi lượt AI chạy được ghi kèm phiên bản mô hình, mã ca, người xem.</div><span class="chip grn" style="margin-top:10px">Đang ghi</span></div>
+<div class="card" style="background:#0E141B"><div style="font-weight:600">Hàng đợi ngoại tuyến</div><div class="lbl" style="margin-top:4px">Trạm mất mạng: phiếu T1 lưu trên máy, tự đồng bộ khi có mạng.</div><span class="chip amb" style="margin-top:10px">2 phiếu chờ</span></div>
+</div>
+</template>
+</div>
+</section>
+</div>
+</main>
+</div>
+</template>
+<script src="assets/dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 0 }; }
+  navVals(cur) {
+    const N = [['h','Lâm sàng'],['01','Tổng quan','Main'],['02','Tiếp nhận & sàng lọc','Intake'],['03','Danh sách ca đọc','Worklist'],['04','Đọc phim DICOM','Viewer'],['05','Phân tầng nguy cơ AI','Risk'],['06','Kết quả & báo cáo','Report'],['h','Phối hợp tuyến'],['07','Hội chẩn từ xa','Consult'],['08','Chuyển tuyến','Referral'],['09','Liên thông HIS/PACS','Integration'],['09b','Cấu hình liên thông','IntegrationConfig'],['10','Cảnh báo & trực','Alerts'],['h','Quản lý'],['11','Thống kê & chất lượng','Analytics'],['12','Quản trị hệ thống','Admin'],['h','AI Studio'],['13a','Dữ liệu & gán nhãn','Labeling'],['13b','Huấn luyện & đánh giá','Training'],['13c','Cấu hình mô hình AI','ModelConfig']];
+    return N.map(n => n[0] === 'h' ? { head: true, link: false, t: n[1] } : { head: false, link: true, num: n[0], t: n[1], href: n[2] + '.html', cls: n[2] === cur ? 'on' : '', cur: n[2] === cur ? 'page' : undefined });
+  }
+  renderVals() {
+    const t = this.state.tab;
+    const T = ['Nhật ký bản tin', 'Ánh xạ mã dịch vụ', 'Mở trong ngữ cảnh', 'Bảo mật & dữ liệu'];
+    const ok = '#3FBF7F';
+    return {
+      nav: this.navVals('Integration'),
+      tab0: t === 0, tab1: t === 1, tab2: t === 2, tab3: t === 3,
+      tabs: T.map((x, i) => ({ t: x, sel: t === i, cls: t === i ? 'sel' : '', pick: () => this.setState({ tab: i }) })),
+      conns: [
+        { t: 'HIS BV tỉnh', p: 'HL7 FHIR R4 · SMART launch', st: 'Hoạt động', cls: 'grn', c: ok, n: '214', l: '180 ms' },
+        { t: 'HIS TTYT khu vực [A]', p: 'HL7 v2.5 · MLLP', st: 'Hoạt động', cls: 'grn', c: ok, n: '96', l: '240 ms' },
+        { t: 'Phần mềm trạm y tế xã', p: 'REST adapter · đồng bộ ngoại tuyến', st: '12/14 trạm', cls: 'amb', c: '#F2B33D', n: '58', l: '1,2 s' },
+        { t: 'PACS cụm tỉnh', p: 'DICOMweb QIDO / WADO / STOW', st: 'Hoạt động', cls: 'grn', c: ok, n: '1 284 ảnh', l: '0,9 s/lát' },
+        { t: 'Máy CT TTYT [A]', p: 'DICOM C-STORE → cổng AI', st: 'Hoạt động', cls: 'grn', c: ok, n: '31 ca', l: '—' },
+        { t: 'Hội chẩn từ xa Chợ Rẫy', p: 'API nền tảng hội chẩn', st: 'Hoạt động', cls: 'grn', c: ok, n: '7 phiên', l: '—' }
+      ],
+      log: [
+        { t: '19:52:07', d: 'Gửi đi', s: 'HIS BV tỉnh', m: 'DiagnosticReport', id: 'CT-2611-0142', st: '201 Created', cls: 'grn', ms: '212' },
+        { t: '19:52:07', d: 'Gửi đi', s: 'HIS TTYT [A]', m: 'ORU^R01', id: 'CT-2611-0142', st: 'ACK AA', cls: 'grn', ms: '340' },
+        { t: '19:41:30', d: 'Nhận', s: 'Máy CT TTYT [A]', m: 'C-STORE 32 ảnh', id: 'CT-2611-0142', st: 'Thành công', cls: 'grn', ms: '—' },
+        { t: '19:38:02', d: 'Nhận', s: 'HIS TTYT [A]', m: 'ORM^O01', id: 'CT-2611-0142', st: 'Đã tạo ca', cls: 'grn', ms: '95' },
+        { t: '19:21:44', d: 'Nhận', s: 'Trạm y tế [E]', m: 'POST /intake (đồng bộ)', id: 'LS-2611-0140', st: 'Đồng bộ trễ 14′', cls: 'amb', ms: '1 240' },
+        { t: '19:05:12', d: 'Nhận', s: 'HIS BV tỉnh', m: 'ServiceRequest', id: 'XQ-2611-0139', st: 'Đã tạo ca', cls: 'grn', ms: '160' },
+        { t: '18:47:55', d: 'Gửi đi', s: 'HIS TTYT [C]', m: 'ORU^R01', id: 'CT-2611-0118', st: 'ACK AE · thử lại', cls: 'red', ms: '—' },
+        { t: '18:48:10', d: 'Gửi đi', s: 'HIS TTYT [C]', m: 'ORU^R01', id: 'CT-2611-0118', st: 'ACK AA', cls: 'grn', ms: '410' }
+      ],
+      maps: [
+        { a: 'DV-CT-001', b: 'Chụp CT sọ não không tiêm thuốc cản quang', c: 'CT_HEAD_NC', d: 'T3 · xuất huyết + phân đoạn', st: 'Đã ánh xạ', cls: 'grn' },
+        { a: 'DV-CT-002', b: 'Chụp CT sọ não có tiêm thuốc cản quang', c: 'CT_HEAD_C', d: 'Không chạy AI', st: 'Bỏ qua', cls: 'gry' },
+        { a: 'DV-XQ-003', b: 'Chụp X-quang sọ thẳng nghiêng', c: 'XR_SKULL_AP_LAT', d: 'T2 · vỡ / lún sọ', st: 'Đã ánh xạ', cls: 'grn' },
+        { a: 'DV-XQ-009', b: 'Chụp X-quang Blondeau / Hirtz', c: '—', d: '—', st: 'Chưa ánh xạ', cls: 'amb' },
+        { a: 'DV-KB-011', b: 'Phiếu khám chấn thương đầu (trạm y tế)', c: 'FORM_TBI_T1', d: 'T1 · quy tắc lâm sàng', st: 'Đã ánh xạ', cls: 'grn' }
+      ]
+    };
+  }
+}
+DC.mount(Component);
+</script>
+</body>
+</html>

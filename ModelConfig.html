@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cấu hình mô hình AI · NeuroTriage</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0F14}
+a{color:#4CC3E0}a:hover{color:#8DDCEE}
+.app{font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#E7EDF4;background:#0B0F14;font-size:14px;line-height:1.45;min-height:100vh;display:flex;flex-wrap:wrap}
+.side{flex:1 1 236px;background:#0F141B;border-right:1px solid #1F2935;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8796AA;padding:14px 12px 4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#A9B6C7;text-decoration:none;font-size:13.5px;min-height:24px}
+.nav:hover{background:#18202A;color:#E7EDF4}
+.nav.on{background:#14313B;color:#E7EDF4;font-weight:600}
+.num{font-size:11px;color:#8796AA;min-width:24px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid #1F2935;background:#0F141B}
+.body{padding:24px 28px 40px;display:flex;flex-direction:column;gap:20px}
+.card{background:#121820;border:1px solid #1F2935;border-radius:12px;padding:18px;min-width:0}
+.h{font-size:14px;font-weight:600;color:#E7EDF4;margin:0 0 12px}
+.lbl{font-size:12px;color:#93A3B8}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex:none}
+.red{background:#3A1719;color:#FF8A8A}.amb{background:#3A2C10;color:#F7C25E}.grn{background:#0F3020;color:#5FD39A}.blu{background:#10303A;color:#6FD3EA}.gry{background:#1E2733;color:#B4C0CF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid #2A3646;background:#18202A;color:#E7EDF4;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn:hover{background:#202B38;color:#E7EDF4}
+.btn.pri{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.in{width:100%;box-sizing:border-box;min-height:40px;padding:8px 10px;border-radius:8px;border:1px solid #2A3646;background:#0E141B;color:#E7EDF4;font:inherit;font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.tool{min-height:44px;padding:0 14px;border-radius:8px;border:1px solid #232E3C;background:#121820;color:#C9D4E1;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.tool.sel{background:#14313B;border-color:#2C6E80;color:#E7EDF4}
+.fld{display:flex;flex-direction:column;gap:4px}
+.sw{position:relative;width:46px;height:26px;border-radius:13px;border:none;cursor:pointer;flex:none;padding:0}
+.sw span{position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:600;color:#93A3B8;font-size:12px;padding:8px 10px;border-bottom:1px solid #1F2935;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #18202A;vertical-align:middle}
+.scroll{overflow-x:auto}
+.cb{width:18px;height:18px;margin:0;accent-color:#4CC3E0}
+.num-in{width:84px;min-height:36px;padding:4px 8px;border-radius:6px;border:1px solid #2A3646;background:#0E141B;color:#E7EDF4;font-family:'JetBrains Mono',monospace;font-size:13px}
+</style>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-template">
+
+<div class="app">
+<aside class="side" aria-label="Phân hệ">
+<div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">
+<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4CC3E0"></rect><path d="M7 17h5l2.5-6 3.5 11 2.5-5H25" stroke="#06232B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-weight:700;font-size:15px">NeuroTriage</div><div class="lbl">AI hỗ trợ chấn thương sọ não</div></div>
+</div>
+<nav style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{nav}}" as="n" hint-placeholder-count="20">
+<template data-sc="if" value="{{n.head}}" hint-placeholder-val="{{false}}"><div class="grp">{{n.t}}</div></template>
+<template data-sc="if" value="{{n.link}}" hint-placeholder-val="{{true}}"><a class="nav {{n.cls}}" href="{{n.href}}" aria-current="{{n.cur}}"><span class="mono num">{{n.num}}</span>{{n.t}}</a></template>
+</template>
+</nav>
+</aside>
+<main class="main">
+<header class="top">
+<div style="flex:1 1 320px;min-width:0"><div class="lbl">AI Studio · 13c · Cấu hình đang chạy: cfg-2026.10.3 (đã duyệt 12/10/2026)</div><h1 style="margin:2px 0 0;font-size:20px;font-weight:700">Cấu hình mô hình AI</h1></div>
+<span class="chip amb">Dữ liệu mô phỏng</span>
+<span class="chip {{dirtyCls}}">{{dirtyText}}</span>
+<button type="button" class="btn" onClick="{{reset}}">Hoàn nguyên</button>
+<button type="button" class="btn pri" onClick="{{submit}}">Gửi hội đồng phê duyệt</button>
+</header>
+<div class="body">
+<template data-sc="if" value="{{submitted}}" hint-placeholder-val="{{false}}"><div role="status" style="padding:12px 14px;border-radius:10px;background:#10303A;color:#6FD3EA;font-size:13px">Đã tạo yêu cầu thay đổi CR-2026-041. Cấu hình mới chỉ có hiệu lực sau khi hội đồng chuyên môn phê duyệt; trong lúc chờ, hệ thống tiếp tục chạy cfg-2026.10.3.</div></template>
+<div style="padding:12px 14px;border-radius:10px;border:1px solid #4A3A16;background:#17140D;font-size:13px;color:#F7C25E">Mọi thay đổi ngưỡng, chế độ hoặc quy tắc gộp đều được ghi nhật ký và cần phê duyệt. Các ràng buộc an toàn G-01, G-02 bị khóa, không sửa được tại đây.</div>
+<section class="card">
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px" role="tablist" aria-label="Chọn mô hình">
+<template data-sc="for" list="{{tiers}}" as="t" hint-placeholder-count="5"><button type="button" role="tab" class="tool {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.t}}</button></template>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:20px">
+<div style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<label class="fld"><span class="lbl">Phiên bản đang dùng</span><select class="in" onChange="{{onVer}}"><template data-sc="for" list="{{versions}}" as="v" hint-placeholder-count="3"><option value="{{v.v}}" selected="{{v.sel}}">{{v.t}}</option></template></select></label>
+<div class="fld"><span class="lbl">Chế độ vận hành</span>
+<div style="display:flex;gap:6px" role="radiogroup" aria-label="Chế độ vận hành"><template data-sc="for" list="{{modes}}" as="m" hint-placeholder-count="3"><button type="button" role="radio" class="tool {{m.cls}}" aria-checked="{{m.sel}}" onClick="{{m.pick}}" style="flex:1">{{m.t}}</button></template></div>
+<span class="lbl">{{modeDesc}}</span>
+</div>
+<label class="fld"><span class="lbl">Khi mô hình lỗi hoặc quá thời gian</span><select class="in"><option>Giữ mức của quy tắc lâm sàng T1 + cảnh báo bác sĩ đọc thủ công</option><option>Đẩy ca lên mức Vàng + cảnh báo</option></select></label>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+<label class="fld"><span class="lbl">Vùng xám: cận dưới</span><input class="num-in" type="number" step="0.01" min="0" max="1" value="{{gLo}}" onChange="{{onGLo}}"></label>
+<label class="fld"><span class="lbl">Vùng xám: cận trên</span><input class="num-in" type="number" step="0.01" min="0" max="1" value="{{gHi}}" onChange="{{onGHi}}"></label>
+<label class="fld"><span class="lbl">Nhiệt độ hiệu chuẩn (T)</span><input class="num-in" type="number" step="0.05" value="1.35"></label>
+</div>
+</div>
+<div style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:10px">
+<div class="fld"><span class="lbl">Ngưỡng vận hành (xác suất dương tính)</span>
+<div style="display:flex;align-items:center;gap:12px"><input type="range" min="0" max="7" value="{{ti}}" onChange="{{onTh}}" aria-label="Ngưỡng" style="flex:1;accent-color:#4CC3E0;min-height:44px"><span class="mono" style="font-size:20px;font-weight:600;min-width:52px;text-align:right">{{thv}}</span></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<div class="card" style="padding:10px;background:#0E141B"><div class="lbl">Độ nhạy (val)</div><div class="mono" style="font-size:20px;font-weight:600;color:{{seC}}">{{se}}</div></div>
+<div class="card" style="padding:10px;background:#0E141B"><div class="lbl">Độ đặc hiệu</div><div class="mono" style="font-size:20px;font-weight:600">{{sp}}</div></div>
+<div class="card" style="padding:10px;background:#0E141B"><div class="lbl">Cảnh báo nhầm/ngày</div><div class="mono" style="font-size:20px;font-weight:600">{{fpd}}</div></div>
+</div>
+<div style="position:relative;height:30px;margin-top:6px" aria-hidden="true">
+<div style="position:absolute;left:0;right:0;top:10px;height:10px;border-radius:5px;background:#1F5A3C"></div>
+<div style="position:absolute;left:{{gLoP}}%;width:{{gW}}%;top:10px;height:10px;background:#6B5420"></div>
+<div style="position:absolute;left:{{gHiP}}%;right:0;top:10px;height:10px;border-radius:0 5px 5px 0;background:#7A2A2E"></div>
+<div style="position:absolute;left:{{thP}}%;top:4px;width:3px;height:22px;background:#E7EDF4"></div>
+</div>
+<div class="lbl">Xanh: âm tính · Vàng: vùng xám, bác sĩ bắt buộc đọc · Đỏ: dương tính · Vạch trắng: ngưỡng vận hành. Ước tính trên 48 ca/ngày.</div>
+<div style="padding:10px 12px;border-radius:8px;font-size:13px;background:{{vBg}};color:{{vC}}">{{verdict}}</div>
+</div>
+</div>
+<h3 class="h" style="margin-top:20px">Kiểm tra chất lượng ảnh đầu vào</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+<label class="fld"><span class="lbl">Độ dày lát tối đa (mm)</span><input class="num-in" type="number" value="5"></label>
+<label class="fld"><span class="lbl">Góc nghiêng đầu tối đa (°)</span><input class="num-in" type="number" value="15"></label>
+<label class="fld"><span class="lbl">Số lát tối thiểu</span><input class="num-in" type="number" value="20"></label>
+<label class="fld"><span class="lbl">Ảnh chụp phim bằng điện thoại</span><select class="in"><option>Cho phép, gắn cờ độ tin cậy thấp</option><option>Không cho phép</option></select></label>
+</div>
+</section>
+<section class="card">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px"><h2 class="h" style="margin:0;flex:1">Quy tắc gộp Xanh – Vàng – Đỏ</h2><button type="button" class="btn">Thêm quy tắc</button></div>
+<div class="scroll"><table>
+<thead><tr><th>Bật</th><th>Mã</th><th>Nguồn</th><th>Điều kiện</th><th>Giá trị</th><th>Kết quả</th><th>Ghi chú</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{rules}}" as="r" hint-placeholder-count="8">
+<tr>
+<td><input class="cb" type="checkbox" aria-label="Bật {{r.id}}" checked="{{r.on}}" disabled="{{r.lock}}" onChange="{{r.tg}}"></td>
+<td class="mono" style="font-size:12px">{{r.id}}</td><td><span class="chip blu mono">{{r.src}}</span></td><td>{{r.cond}}</td>
+<td><template data-sc="if" value="{{r.editable}}" hint-placeholder-val="{{true}}"><input class="num-in" type="number" step="{{r.step}}" value="{{r.val}}" onChange="{{r.onVal}}" aria-label="Giá trị {{r.id}}"> <span class="lbl">{{r.unit}}</span></template><template data-sc="if" value="{{r.fixed}}" hint-placeholder-val="{{false}}"><span class="lbl">—</span></template></td>
+<td><span class="chip {{r.cls}}">{{r.out}}</span></td><td class="lbl">{{r.note}}</td>
+</tr>
+</template>
+</tbody></table></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"><span class="lbl" style="align-self:center">Nhóm đặc biệt (không bao giờ xếp Xanh):</span>
+<template data-sc="for" list="{{special}}" as="g" hint-placeholder-count="4"><label class="chip gry" style="cursor:pointer;padding:6px 12px"><input class="cb" type="checkbox" checked="{{g.on}}" onChange="{{g.tg}}">{{g.t}}</label></template>
+</div>
+</section>
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px">
+<div class="card">
+<h2 class="h">Tầng AI được bật theo cơ sở</h2>
+<div class="scroll"><table>
+<thead><tr><th>Cơ sở</th><th>T1</th><th>T2 X-quang</th><th>T3 CT</th><th>Hiển thị cho</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{sites}}" as="s" hint-placeholder-count="5">
+<tr><td style="font-weight:600">{{s.n}}</td><template data-sc="for" list="{{s.cells}}" as="c" hint-placeholder-count="3"><td><input class="cb" type="checkbox" aria-label="{{c.l}}" checked="{{c.on}}" disabled="{{c.na}}" onChange="{{c.tg}}"></td></template><td class="lbl">{{s.who}}</td></tr>
+</template>
+</tbody></table></div>
+<div class="lbl" style="margin-top:8px">Ô bị khóa: cơ sở không có thiết bị tương ứng.</div>
+</div>
+<div class="card">
+<h2 class="h">Hạ tầng suy luận</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+<label class="fld"><span class="lbl">Máy chủ Triton</span><input class="in mono" placeholder="triton.ai.svc:8001"></label>
+<label class="fld"><span class="lbl">Nút GPU</span><select class="in"><option>gpu-01 (đang dùng)</option><option>gpu-02 (dự phòng)</option></select></label>
+<label class="fld"><span class="lbl">Batch tối đa</span><input class="num-in" type="number" value="8"></label>
+<label class="fld"><span class="lbl">Thời gian chờ tối đa (giây)</span><input class="num-in" type="number" value="60"></label>
+<label class="fld"><span class="lbl">Số luồng đồng thời</span><input class="num-in" type="number" value="4"></label>
+<label class="fld"><span class="lbl">Ưu tiên hàng đợi</span><select class="in"><option>Theo mức T1 (Đỏ trước)</option><option>Theo thời gian đến</option></select></label>
+</div>
+<h3 class="h" style="margin-top:16px">Giải thích kết quả</h3>
+<div style="display:flex;flex-direction:column;gap:8px">
+<template data-sc="for" list="{{xai}}" as="x" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px"><button type="button" class="sw" role="switch" aria-checked="{{x.on}}" aria-label="{{x.t}}" onClick="{{x.tg}}" style="background:{{x.bg}}"><span style="left:{{x.x}}px"></span></button><span style="font-size:13px;flex:1">{{x.t}}</span><span class="lbl">{{x.d}}</span></div></template>
+</div>
+</div>
+</section>
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px">
+<div class="card">
+<h2 class="h">Ngưỡng giám sát sau triển khai</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+<label class="fld"><span class="lbl">Độ nhạy phân nhóm tối thiểu</span><input class="num-in" type="number" step="0.01" value="0.90"></label>
+<label class="fld"><span class="lbl">PSI cảnh báo drift</span><input class="num-in" type="number" step="0.05" value="0.20"></label>
+<label class="fld"><span class="lbl">Cửa sổ đánh giá (ngày)</span><input class="num-in" type="number" value="30"></label>
+<label class="fld"><span class="lbl">Khi vượt ngưỡng</span><select class="in"><option>Cảnh báo + đề xuất chuyển im lặng (cần duyệt)</option><option>Chỉ cảnh báo</option></select></label>
+</div>
+</div>
+<div class="card">
+<h2 class="h">Lịch sử cấu hình</h2>
+<div class="scroll"><table>
+<thead><tr><th>Phiên bản</th><th>Thay đổi</th><th>Người đề xuất</th><th>Phê duyệt</th><th>Ngày</th></tr></thead>
+<tbody>
+<template data-sc="for" list="{{hist}}" as="h" hint-placeholder-count="4"><tr><td class="mono" style="font-size:12px;white-space:nowrap">{{h.v}}</td><td style="min-width:220px">{{h.c}}</td><td>{{h.by}}</td><td><span class="chip {{h.cls}}">{{h.ap}}</span></td><td class="mono lbl" style="white-space:nowrap">{{h.d}}</td></tr></template>
+</tbody></table></div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</template>
+<script src="assets/dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = this.init(); }
+  init() {
+    return { tier: 2, mode: { 0: 0, 1: 1, 2: 0, 3: 1, 4: 1 }, ver: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, ti: 3, gLo: 0.35, gHi: 0.65,
+      rOff: {}, rVal: { R03: 25, R04: 5, R01: 13 }, spOff: {}, siteOff: {}, xai: { cam: true, ig: false, shap: true }, dirty: false, submitted: false };
+  }
+  navVals(cur) {
+    const N = [['h','Lâm sàng'],['01','Tổng quan','Main'],['02','Tiếp nhận & sàng lọc','Intake'],['03','Danh sách ca đọc','Worklist'],['04','Đọc phim DICOM','Viewer'],['05','Phân tầng nguy cơ AI','Risk'],['06','Kết quả & báo cáo','Report'],['h','Phối hợp tuyến'],['07','Hội chẩn từ xa','Consult'],['08','Chuyển tuyến','Referral'],['09','Liên thông HIS/PACS','Integration'],['09b','Cấu hình liên thông','IntegrationConfig'],['10','Cảnh báo & trực','Alerts'],['h','Quản lý'],['11','Thống kê & chất lượng','Analytics'],['12','Quản trị hệ thống','Admin'],['h','AI Studio'],['13a','Dữ liệu & gán nhãn','Labeling'],['13b','Huấn luyện & đánh giá','Training'],['13c','Cấu hình mô hình AI','ModelConfig']];
+    return N.map(n => n[0] === 'h' ? { head: true, link: false, t: n[1] } : { head: false, link: true, num: n[0], t: n[1], href: n[2] + '.html', cls: n[2] === cur ? 'on' : '', cur: n[2] === cur ? 'page' : undefined });
+  }
+  ch(p) { this.setState(Object.assign({ dirty: true, submitted: false }, p)); }
+  renderVals() {
+    const s = this.state;
+    const T = [['T1 · Lâm sàng', ['v0.9 · CCHR/PECARN + XGBoost', 'v0.8']], ['T2 · X-quang', ['v0.4 · DenseNet-121 + YOLOv8', 'v0.3']], ['T3 · Phát hiện XH', ['v1.3 · EfficientNetV2 2.5D + Bi-GRU', 'v1.2', 'v1.4-rc (chưa khóa, không chọn được)']], ['T3 · Phân đoạn', ['seg-0.6 · nnU-Net 3D', 'seg-0.5']], ['X-quang · Vỡ/lún', ['v0.4 · YOLOv8 2 pha', 'v0.3']]];
+    const M = [['Hiển thị', 'Kết quả hiện cho bác sĩ và tham gia quy tắc gộp.'], ['Im lặng', 'Chạy song song, ghi kết quả để đánh giá; bác sĩ không thấy, không ảnh hưởng mức nguy cơ.'], ['Tắt', 'Không chạy. Quy tắc gộp bỏ qua tầng này.']];
+    const TH = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50];
+    const SE = [0.99, 0.985, 0.97, 0.958, 0.947, 0.93, 0.91, 0.88];
+    const SP = [0.71, 0.80, 0.86, 0.89, 0.915, 0.93, 0.95, 0.965];
+    const f = v => Number(v).toFixed(2).replace('.', ',');
+    const pass = SE[s.ti] >= 0.95;
+    const gapOk = s.gLo < s.gHi;
+    const R = [
+      ['R01', 'T1', 'GCS nhỏ hơn', true, 1, 'điểm', 'Đỏ', 'red', 'Kèm dấu hiệu khu trú, co giật → Đỏ'],
+      ['R02', 'T2', 'Phát hiện lún sọ (xác suất ≥ ngưỡng T2)', false, 0, '', 'Đỏ', 'red', ''],
+      ['R03', 'T3', 'Thể tích máu tụ lớn hơn hoặc bằng', true, 1, 'ml', 'Đỏ', 'red', 'Dự thảo, chờ hội đồng'],
+      ['R04', 'T3', 'Lệch đường giữa lớn hơn hoặc bằng', true, 0.5, 'mm', 'Đỏ', 'red', 'Dự thảo, chờ hội đồng'],
+      ['A01', 'T1', 'Nguy cơ trung bình theo CCHR/PECARN', false, 0, '', 'Vàng', 'amb', ''],
+      ['A02', 'T2', 'Nghi vỡ xương', false, 0, '', 'Vàng', 'amb', ''],
+      ['A03', 'T3', 'Xác suất trong vùng xám', false, 0, '', 'Vàng', 'amb', 'Bác sĩ bắt buộc đọc'],
+      ['G01', 'T2', 'Kết quả X-quang không được hạ mức T1', false, 0, '', 'Khóa', 'blu', 'Ràng buộc an toàn'],
+      ['G02', 'AI', 'AI không được hạ mức của quy tắc lâm sàng', false, 0, '', 'Khóa', 'blu', 'Ràng buộc an toàn']
+    ];
+    const rules = R.map(r => { const lock = r[0][0] === 'G'; return { id: r[0], src: r[1], cond: r[2], editable: r[3], fixed: !r[3], step: String(r[4]), val: s.rVal[r[0]], unit: r[5], out: r[6], cls: r[7], note: r[8], lock, on: lock || !s.rOff[r[0]], tg: () => this.ch({ rOff: Object.assign({}, this.state.rOff, { [r[0]]: !this.state.rOff[r[0]] }) }), onVal: e => this.ch({ rVal: Object.assign({}, this.state.rVal, { [r[0]]: e.target.value }) }) }; });
+    const SITES = [['TYT xã [B]', [1, 1, 0], 'BS trạm'], ['TYT xã [E]', [1, 0, 0], 'BS trạm'], ['TTYT khu vực [A]', [1, 1, 1], 'BS, CĐHA'], ['BV đa khoa tỉnh', [1, 1, 1], 'CĐHA, ngoại TK'], ['BV Chợ Rẫy', [0, 1, 1], 'Hội chẩn']];
+    const tierN = ['T1', 'T2', 'T3'];
+    return {
+      nav: this.navVals('ModelConfig'),
+      dirtyText: s.dirty ? 'Có thay đổi chưa gửi' : 'Không có thay đổi', dirtyCls: s.dirty ? 'amb' : 'grn',
+      reset: () => this.setState(this.init()),
+      submit: () => this.setState({ submitted: true, dirty: false }),
+      submitted: s.submitted,
+      tiers: T.map((t, i) => ({ t: t[0], sel: s.tier === i, cls: s.tier === i ? 'sel' : '', pick: () => this.setState({ tier: i }) })),
+      versions: T[s.tier][1].map((t, i) => ({ t, v: String(i), sel: s.ver[s.tier] === i })),
+      onVer: e => this.ch({ ver: Object.assign({}, this.state.ver, { [this.state.tier]: +e.target.value }) }),
+      modes: M.map((m, i) => ({ t: m[0], sel: s.mode[s.tier] === i, cls: s.mode[s.tier] === i ? 'sel' : '', pick: () => this.ch({ mode: Object.assign({}, this.state.mode, { [this.state.tier]: i }) }) })),
+      modeDesc: M[s.mode[s.tier]][1],
+      ti: s.ti, onTh: e => this.ch({ ti: +e.target.value }), thv: f(TH[s.ti]), se: f(SE[s.ti]), sp: f(SP[s.ti]), fpd: String(Math.round((1 - SP[s.ti]) * 48 * 0.8)),
+      seC: pass ? '#5FD39A' : '#FF8A8A',
+      gLo: s.gLo, gHi: s.gHi, onGLo: e => this.ch({ gLo: +e.target.value }), onGHi: e => this.ch({ gHi: +e.target.value }),
+      gLoP: s.gLo * 100, gHiP: s.gHi * 100, gW: Math.max(0, (s.gHi - s.gLo) * 100), thP: TH[s.ti] * 100,
+      verdict: !gapOk ? 'Lỗi: cận dưới vùng xám phải nhỏ hơn cận trên.' : pass ? 'Đạt mục tiêu an toàn (độ nhạy ≥ 0,95 trên tập validation).' : 'Không đạt: độ nhạy dưới 0,95. Hệ thống sẽ không cho gửi phê duyệt cấu hình này.',
+      vBg: gapOk && pass ? '#0F3020' : '#3A1719', vC: gapOk && pass ? '#5FD39A' : '#FF8A8A',
+      rules,
+      special: [['ac', 'Dùng thuốc chống đông'], ['65', 'Trên 65 tuổi'], ['2', 'Dưới 2 tuổi'], ['al', 'Có uống rượu bia']].map(([k, t]) => ({ t, on: !s.spOff[k], tg: () => this.ch({ spOff: Object.assign({}, this.state.spOff, { [k]: !this.state.spOff[k] }) }) })),
+      sites: SITES.map((st, si) => ({ n: st[0], who: st[2], cells: st[1].map((av, ti) => { const k = si + '-' + ti; return { l: st[0] + ' ' + tierN[ti], na: !av, on: !!av && !s.siteOff[k], tg: () => this.ch({ siteOff: Object.assign({}, this.state.siteOff, { [k]: !this.state.siteOff[k] }) }) }; }) })),
+      xai: [['cam', 'Grad-CAM', 'Bản đồ nhiệt trên ảnh CT/X-quang'], ['ig', 'Integrated Gradients', 'Chậm hơn ~3×, dùng khi hội chẩn'], ['shap', 'SHAP cho T1', 'Yếu tố lâm sàng đóng góp']].map(([k, t, d]) => ({ t, d, on: !!s.xai[k], bg: s.xai[k] ? '#2FA3C2' : '#3A4757', x: s.xai[k] ? 23 : 3, tg: () => this.ch({ xai: Object.assign({}, this.state.xai, { [k]: !this.state.xai[k] }) }) })),
+      hist: [
+        { v: 'cfg-2026.10.3', c: 'Bật hiển thị T3 v1.3 sau 90 ngày im lặng', by: 'Nhóm AI', ap: 'Hội đồng · đã duyệt', cls: 'grn', d: '12/10/2026' },
+        { v: 'cfg-2026.09.1', c: 'Vùng xám 0,30–0,70 → 0,35–0,65', by: 'BS CĐHA trưởng nhóm', ap: 'Hội đồng · đã duyệt', cls: 'grn', d: '18/09/2026' },
+        { v: 'cfg-2026.08.2', c: 'Thêm "uống rượu bia" vào nhóm đặc biệt', by: 'BS cấp cứu', ap: 'Hội đồng · đã duyệt', cls: 'grn', d: '02/08/2026' },
+        { v: 'cfg-2026.07.4', c: 'Nâng ngưỡng R03 từ 25 ml lên 30 ml', by: 'BS ngoại TK', ap: 'Từ chối', cls: 'red', d: '21/07/2026' }
+      ]
+    };
+  }
+}
+DC.mount(Component);
+</script>
+</body>
+</html>

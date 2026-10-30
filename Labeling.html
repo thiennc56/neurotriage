@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Studio: dữ liệu và gán nhãn · NeuroTriage</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0F14}
+a{color:#4CC3E0}a:hover{color:#8DDCEE}
+.app{font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#E7EDF4;background:#0B0F14;font-size:14px;line-height:1.45;min-height:100vh;display:flex;flex-wrap:wrap}
+.side{flex:1 1 236px;background:#0F141B;border-right:1px solid #1F2935;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8796AA;padding:14px 12px 4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#A9B6C7;text-decoration:none;font-size:13.5px;min-height:24px}
+.nav:hover{background:#18202A;color:#E7EDF4}
+.nav.on{background:#14313B;color:#E7EDF4;font-weight:600}
+.num{font-size:11px;color:#8796AA;min-width:24px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 24px;border-bottom:1px solid #1F2935;background:#0F141B}
+.card{background:#121820;border:1px solid #1F2935;border-radius:12px;padding:14px;min-width:0}
+.h{font-size:13.5px;font-weight:600;color:#E7EDF4;margin:0 0 10px}
+.lbl{font-size:12px;color:#93A3B8}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex:none}
+.red{background:#3A1719;color:#FF8A8A}.amb{background:#3A2C10;color:#F7C25E}.grn{background:#0F3020;color:#5FD39A}.blu{background:#10303A;color:#6FD3EA}.gry{background:#1E2733;color:#B4C0CF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid #2A3646;background:#18202A;color:#E7EDF4;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn:hover{background:#202B38;color:#E7EDF4}
+.btn.pri{background:#4CC3E0;border-color:#4CC3E0;color:#06232B}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.tool{min-height:40px;min-width:40px;padding:0 10px;border-radius:8px;border:1px solid #232E3C;background:#121820;color:#C9D4E1;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.tool.sel{background:#14313B;border-color:#2C6E80;color:#E7EDF4}
+.tgrp{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:10px;border:1px solid #1F2935;background:#0E141B;align-items:center}
+.tgrp .cap{font-size:11px;color:#8796AA;padding:0 6px;text-transform:uppercase;letter-spacing:.06em}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.chk{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;border:1px solid #1F2935;background:#0E141B;cursor:pointer}
+.chk input{width:18px;height:18px;margin:0;accent-color:#4CC3E0;flex:none}
+.q{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;border:1px solid #1F2935;background:#0E141B;color:#E7EDF4;text-align:left;font:inherit;cursor:pointer}
+.q.sel{border-color:#4CC3E0;background:#10262E}
+.ov{position:absolute;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#D9E2EC;text-shadow:0 1px 2px #000;pointer-events:none}
+.rng{display:flex;align-items:center;gap:8px;font-size:12px}
+.rng input{flex:1;min-width:80px;accent-color:#4CC3E0;min-height:32px}
+.rng>span:first-child{min-width:92px;white-space:nowrap}
+.rng>span:last-child{min-width:46px;text-align:right}
+.seg{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid #1F2935;background:#0E141B}
+.mini{min-height:32px;min-width:32px;padding:0 8px;border-radius:6px;border:1px solid #2A3646;background:#18202A;color:#C9D4E1;font:inherit;font-size:12px;cursor:pointer}
+.in{width:100%;box-sizing:border-box;min-height:40px;padding:8px 10px;border-radius:8px;border:1px solid #2A3646;background:#0E141B;color:#E7EDF4;font:inherit;font-size:13px}
+.kbd{font-family:'JetBrains Mono',monospace;font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid #2A3646;background:#0E141B}
+</style>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-template">
+
+<div class="app">
+<aside class="side" aria-label="Phân hệ">
+<div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">
+<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4CC3E0"></rect><path d="M7 17h5l2.5-6 3.5 11 2.5-5H25" stroke="#06232B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-weight:700;font-size:15px">NeuroTriage</div><div class="lbl">AI hỗ trợ chấn thương sọ não</div></div>
+</div>
+<nav style="display:flex;flex-direction:column;gap:2px">
+<template data-sc="for" list="{{nav}}" as="n" hint-placeholder-count="20">
+<template data-sc="if" value="{{n.head}}" hint-placeholder-val="{{false}}"><div class="grp">{{n.t}}</div></template>
+<template data-sc="if" value="{{n.link}}" hint-placeholder-val="{{true}}"><a class="nav {{n.cls}}" href="{{n.href}}" aria-current="{{n.cur}}"><span class="mono num">{{n.num}}</span>{{n.t}}</a></template>
+</template>
+</nav>
+</aside>
+<main class="main">
+<header class="top">
+<div style="flex:1 1 300px;min-width:0"><div class="lbl">AI Studio · 13a · DS-CR-2021-25 (Chợ Rẫy hồi cứu, đã ẩn danh) · Nhiệm vụ AT-0817</div><h1 style="margin:2px 0 0;font-size:20px;font-weight:700">Gán nhãn · {{caseId}}</h1></div>
+<span class="chip amb">Dữ liệu mô phỏng</span>
+<span class="chip gry mono">⏱ {{timer}}</span>
+<button type="button" class="btn" onClick="{{undo}}" disabled="{{noUndo}}" aria-label="Hoàn tác">↶ Hoàn tác</button>
+<button type="button" class="btn" onClick="{{redo}}" disabled="{{noRedo}}" aria-label="Làm lại">↷ Làm lại</button>
+<button type="button" class="btn" onClick="{{saveDraft}}">Lưu nháp</button>
+<button type="button" class="btn pri" onClick="{{submit}}">Hoàn tất & ca tiếp</button>
+</header>
+<template data-sc="if" value="{{toast}}" hint-placeholder-val="{{false}}"><div role="status" style="margin:12px 20px 0;padding:10px 14px;border-radius:8px;background:#0F3020;color:#5FD39A;font-size:13px">{{toast}}</div></template>
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;padding:14px 20px 0" aria-label="Tiến độ gán nhãn">
+<template data-sc="for" list="{{prog}}" as="p" hint-placeholder-count="5">
+<div class="card" style="padding:10px 12px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:12.5px;font-weight:600">{{p.t}}</span><span class="mono lbl">{{p.v}}</span></div>
+<div style="height:6px;border-radius:3px;background:#1E2733;overflow:hidden;margin:7px 0 3px"><div style="width:{{p.w}}%;height:100%;background:{{p.c}}"></div></div>
+<div class="lbl">{{p.d}}</div>
+</div>
+</template>
+</section>
+<div style="display:flex;flex-wrap:wrap;gap:14px;padding:14px 20px 32px;align-items:flex-start">
+<nav style="flex:1 1 220px;max-width:250px;display:flex;flex-direction:column;gap:8px" aria-label="Hàng đợi gán nhãn">
+<div class="lbl" style="font-weight:600">Hàng đợi · học chủ động</div>
+<label><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tìm ca</span><input class="in" type="search" placeholder="Tìm mã ca…"></label>
+<div style="display:flex;flex-wrap:wrap;gap:4px" role="tablist" aria-label="Lọc hàng đợi">
+<template data-sc="for" list="{{qf}}" as="f" hint-placeholder-count="4"><button type="button" role="tab" class="tool {{f.cls}}" aria-selected="{{f.sel}}" onClick="{{f.pick}}" style="min-height:36px;font-size:12px">{{f.t}}</button></template>
+</div>
+<template data-sc="for" list="{{queue}}" as="q" hint-placeholder-count="6">
+<button type="button" class="q {{q.cls}}" onClick="{{q.pick}}" aria-pressed="{{q.sel}}">
+<span style="display:flex;gap:6px;align-items:center;width:100%"><span class="mono" style="font-size:12px;flex:1">{{q.id}}</span><span class="chip {{q.tc}}">{{q.tag}}</span></span>
+<span style="display:flex;align-items:center;gap:8px;width:100%"><span class="lbl" style="flex:1">{{q.st}}</span><span class="mono" style="font-size:11.5px">u={{q.u}}</span></span>
+<span style="display:block;height:4px;border-radius:2px;background:#1E2733;overflow:hidden;width:100%"><span style="display:block;width:{{q.w}}%;height:100%;background:#F2B33D"></span></span>
+</button>
+</template>
+<div class="lbl">u: độ bất định của mô hình hiện tại. Ca u cao được gán trước.</div>
+</nav>
+<section style="flex:999 1 480px;min-width:0;display:flex;flex-direction:column;gap:8px" aria-label="Vùng gán nhãn">
+<div style="display:flex;flex-wrap:wrap;gap:6px" role="tablist" aria-label="Mức nhãn">
+<template data-sc="for" list="{{levels}}" as="l" hint-placeholder-count="4"><button type="button" role="tab" class="tool {{l.cls}}" aria-selected="{{l.sel}}" onClick="{{l.pick}}">{{l.t}}</button></template>
+</div>
+<div class="lbl">{{levelDesc}}</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<div class="tgrp" role="toolbar" aria-label="Điều hướng ảnh"><span class="cap">Xem</span>
+<template data-sc="for" list="{{navTools}}" as="t" hint-placeholder-count="4"><button type="button" class="tool {{t.cls}}" aria-pressed="{{t.sel}}" onClick="{{t.pick}}" title="{{t.k}}">{{t.t}}</button></template>
+</div>
+<div class="tgrp" role="toolbar" aria-label="Công cụ vẽ"><span class="cap">Vẽ</span>
+<template data-sc="for" list="{{drawTools}}" as="t" hint-placeholder-count="8"><button type="button" class="tool {{t.cls}}" aria-pressed="{{t.sel}}" onClick="{{t.pick}}" title="{{t.k}}">{{t.t}}</button></template>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+<span class="lbl">Nhãn đang vẽ</span>
+<template data-sc="for" list="{{classes}}" as="c" hint-placeholder-count="7"><button type="button" class="tool {{c.cls}}" aria-pressed="{{c.sel}}" onClick="{{c.pick}}" style="display:inline-flex;align-items:center;gap:6px;min-height:36px"><span class="dot" style="background:{{c.col}};width:10px;height:10px"></span>{{c.t}}</button></template>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+<span class="lbl">Cửa sổ</span>
+<template data-sc="for" list="{{presets}}" as="p" hint-placeholder-count="4"><button type="button" class="tool {{p.cls}}" aria-pressed="{{p.sel}}" onClick="{{p.pick}}" style="min-height:36px">{{p.t}} <span class="mono lbl">{{p.wl}}</span></button></template>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px 18px">
+<label class="rng"><span>Cỡ cọ</span><input type="range" min="1" max="40" value="{{brush}}" onChange="{{onBrush}}"><span class="mono">{{brush}} px</span></label>
+<label class="rng"><span>Độ mờ mặt nạ</span><input type="range" min="10" max="100" value="{{opacity}}" onChange="{{onOpacity}}"><span class="mono">{{opacity}}%</span></label>
+<label class="rng"><span>Phóng to</span><input type="range" min="100" max="300" step="10" value="{{zoom}}" onChange="{{onZoom}}"><span class="mono">{{zoomText}}</span></label>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<template data-sc="for" list="{{layersShow}}" as="s" hint-placeholder-count="4"><label class="chk" style="padding:5px 10px"><input type="checkbox" checked="{{s.on}}" onChange="{{s.tg}}"><span class="dot" style="background:{{s.c}}"></span><span style="font-size:12.5px">{{s.t}}</span></label></template>
+</div>
+<div style="position:relative;background:#000;border-radius:12px;border:1px solid #1F2935;overflow:hidden;aspect-ratio:1/1;width:100%;max-width:580px;align-self:center;cursor:{{cursor}}">
+<div style="position:absolute;inset:0;transform:scale({{scale}});transform-origin:70% 40%">
+<div style="position:absolute;inset:0;filter:{{flt}}">
+<svg viewBox="0 0 400 400" role="img" aria-label="Ảnh CT đang gán nhãn" style="position:absolute;inset:0;width:100%;height:100%">
+<rect width="400" height="400" fill="#000"></rect>
+<ellipse cx="200" cy="205" rx="150" ry="178" fill="#151515" stroke="#ECECEC" stroke-width="13"></ellipse>
+<ellipse cx="200" cy="205" rx="138" ry="166" fill="#6a6a6a"></ellipse>
+<ellipse cx="196" cy="205" rx="112" ry="142" fill="#767676"></ellipse>
+<path d="M176 152 C158 172 160 210 178 238 L186 234 C174 210 174 176 186 158 Z" fill="#2a2a2a"></path>
+<path d="M212 150 C232 170 234 210 216 240 L206 234 C220 210 220 178 204 156 Z" fill="#2a2a2a"></path>
+<template data-sc="if" value="{{hasLesion}}" hint-placeholder-val="{{true}}"><path d="M310 92 Q352 150 330 200 Q320 150 296 104 Z" fill="#dadada"></path></template>
+</svg>
+</div>
+<template data-sc="if" value="{{showAi}}" hint-placeholder-val="{{true}}">
+<svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+<path d="M306 86 Q358 148 332 206 Q318 150 292 102 Z" fill="#4CC3E0" fill-opacity=".14" stroke="#4CC3E0" stroke-width="2" stroke-dasharray="6 4"></path>
+<circle cx="318" cy="140" r="5" fill="#4CC3E0"></circle>
+</svg>
+</template>
+<template data-sc="if" value="{{showR1}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+<path d="M312 96 Q350 152 328 196 Q322 152 300 108 Z" fill="none" stroke="#F7C25E" stroke-width="2" stroke-dasharray="3 3"></path>
+</svg>
+</template>
+<template data-sc="if" value="{{showMine}}" hint-placeholder-val="{{true}}">
+<svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;opacity:{{opacityF}}">
+<path d="M310 92 Q352 150 330 200 Q320 150 296 104 Z" fill="{{mineCol}}" fill-opacity=".55" stroke="{{mineCol}}" stroke-width="2"></path>
+</svg>
+</template>
+<template data-sc="if" value="{{showMid}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+<line x1="196" y1="40" x2="196" y2="370" stroke="#B48CF2" stroke-width="2"></line>
+<circle cx="196" cy="48" r="5" fill="#B48CF2"></circle><circle cx="196" cy="362" r="5" fill="#B48CF2"></circle>
+</svg>
+</template>
+</div>
+<div class="ov" style="left:12px;top:10px">{{caseId}} · lát {{slice}}/30<br>{{wlText}} · {{zoomText}}</div>
+<div class="ov" style="right:12px;top:10px;text-align:right">Công cụ: {{toolName}}<br>Nhãn: {{className}}</div>
+<div class="ov" style="left:12px;bottom:10px">{{sliceInfo}}</div>
+<div class="ov" style="right:12px;bottom:10px;text-align:right">BS. CĐHA #2 · lượt đọc 2/2</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;max-width:580px;width:100%;align-self:center">
+<button type="button" class="mini" onClick="{{prevSlice}}" aria-label="Lát trước">◀</button>
+<input type="range" min="1" max="30" value="{{slice}}" onChange="{{onSlice}}" aria-label="Lát cắt" style="flex:1;accent-color:#4CC3E0;min-height:36px">
+<button type="button" class="mini" onClick="{{nextSlice}}" aria-label="Lát sau">▶</button>
+<span class="mono" style="font-size:12px;min-width:48px;text-align:right">{{slice}}/30</span>
+</div>
+<div style="max-width:580px;width:100%;align-self:center;display:flex;gap:2px;height:12px" aria-hidden="true">
+<template data-sc="for" list="{{strip}}" as="x" hint-placeholder-count="30"><div style="flex:1;border-radius:2px;background:{{x.c}};outline:{{x.o}}"></div></template>
+</div>
+<div style="max-width:580px;width:100%;align-self:center;display:flex;flex-wrap:wrap;gap:12px" class="lbl">
+<span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:#B84348"></span>lát đã gán có tổn thương</span>
+<span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2C6E80"></span>lát đã duyệt, không tổn thương</span>
+<span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:#1E2733"></span>chưa duyệt</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+<button type="button" class="btn" onClick="{{copyNext}}">Chép nhãn sang lát kế</button>
+<button type="button" class="btn" onClick="{{interp}}">Nội suy giữa các lát</button>
+<button type="button" class="btn" onClick="{{acceptAi}}">Nhận gợi ý AI cho lát này</button>
+<button type="button" class="btn" onClick="{{markNormal}}">Lát này bình thường</button>
+</div>
+</section>
+<aside style="flex:1 1 300px;max-width:380px;min-width:0;display:flex;flex-direction:column;gap:12px">
+<section class="card">
+<h2 class="h">Lớp mặt nạ (L3)</h2>
+<div style="display:flex;flex-direction:column;gap:6px">
+<template data-sc="for" list="{{segs}}" as="s" hint-placeholder-count="3">
+<div class="seg">
+<span class="dot" style="background:{{s.col}};width:12px;height:12px"></span>
+<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">{{s.t}}</div><div class="lbl mono">{{s.d}}</div></div>
+<button type="button" class="mini" onClick="{{s.tg}}" aria-pressed="{{s.on}}" aria-label="Ẩn hiện {{s.t}}">{{s.eye}}</button>
+<button type="button" class="mini" onClick="{{s.del}}" aria-label="Xóa {{s.t}}">✕</button>
+</div>
+</template>
+<template data-sc="if" value="{{noSegs}}" hint-placeholder-val="{{false}}"><div class="lbl">Chưa có lớp nào.</div></template>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Nhãn mức ca (L1)</h2>
+<div style="display:flex;flex-direction:column;gap:5px">
+<template data-sc="for" list="{{l1}}" as="c" hint-placeholder-count="5"><label class="chk"><input type="checkbox" checked="{{c.on}}" onChange="{{c.tg}}"><span style="font-size:13px;flex:1">{{c.t}}</span><template data-sc="if" value="{{c.nlp}}" hint-placeholder-val="{{false}}"><span class="chip blu">NLP</span></template></label></template>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Loại xuất huyết tại lát {{slice}} (L2)</h2>
+<div style="display:flex;flex-direction:column;gap:5px">
+<template data-sc="for" list="{{l2}}" as="c" hint-placeholder-count="5"><label class="chk"><input type="checkbox" checked="{{c.on}}" onChange="{{c.tg}}"><span class="dot" style="background:{{c.col}}"></span><span style="font-size:13px">{{c.t}}</span></label></template>
+</div>
+</section>
+<section class="card">
+<h2 class="h">Chất lượng ảnh & tiêu chuẩn loại</h2>
+<div style="display:flex;gap:4px;margin-bottom:8px" role="radiogroup" aria-label="Chất lượng ảnh">
+<template data-sc="for" list="{{quality}}" as="q" hint-placeholder-count="3"><button type="button" role="radio" class="tool {{q.cls}}" aria-checked="{{q.sel}}" onClick="{{q.pick}}" style="flex:1">{{q.t}}</button></template>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<template data-sc="for" list="{{flags}}" as="c" hint-placeholder-count="5"><label class="chk"><input type="checkbox" checked="{{c.on}}" onChange="{{c.tg}}"><span style="font-size:12.5px">{{c.t}}</span></label></template>
+</div>
+<template data-sc="if" value="{{excluded}}" hint-placeholder-val="{{false}}"><div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#3A1719;color:#FF8A8A;font-size:12.5px">Ca sẽ bị loại khỏi tập huấn luyện và chuyển sang danh sách rà soát.</div></template>
+</section>
+<section class="card">
+<h2 class="h">Độ chắc chắn & ghi chú</h2>
+<div style="display:flex;gap:4px" role="radiogroup" aria-label="Độ chắc chắn">
+<template data-sc="for" list="{{conf}}" as="q" hint-placeholder-count="3"><button type="button" role="radio" class="tool {{q.cls}}" aria-checked="{{q.sel}}" onClick="{{q.pick}}" style="flex:1">{{q.t}}</button></template>
+</div>
+<textarea class="in" rows="2" style="margin-top:8px;resize:vertical" placeholder="Ghi chú cho người phân xử hoặc nhóm AI…"></textarea>
+<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#0E141B;border:1px solid #1F2935;font-size:12.5px"><div class="lbl" style="margin-bottom:2px">Kết luận CĐHA gốc (đã ẩn danh)</div>“Máu tụ ngoài màng cứng vùng thái dương phải, dày 12 mm. Không lệch đường giữa.”</div>
+</section>
+<section class="card">
+<h2 class="h">Đọc kép & phân xử</h2>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+<div style="display:flex;justify-content:space-between"><span>Ca này đọc kép</span><span class="chip blu">Có · ngẫu nhiên 20%</span></div>
+<div style="display:flex;justify-content:space-between"><span>Dice với người đọc 1</span><span class="mono" style="color:{{diceC}}">{{dice}}</span></div>
+<div style="display:flex;justify-content:space-between"><span>Đồng thuận L1</span><span class="chip {{agreeCls}}">{{agree}}</span></div>
+<div style="display:flex;justify-content:space-between"><span>Cohen κ toàn bộ</span><span class="mono">0,87</span></div>
+</div>
+<button type="button" class="btn" style="width:100%;margin-top:10px" onClick="{{adjud}}">{{adjText}}</button>
+<div class="lbl" style="margin-top:6px">Dice dưới 0,50 tự động chuyển phân xử. Tham chiếu: Dice giữa các chuyên gia chỉ khoảng 0,64.</div>
+</section>
+<details class="card">
+<summary style="cursor:pointer;font-weight:600;font-size:13.5px;min-height:28px">Phím tắt</summary>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin-top:10px;font-size:12.5px">
+<span class="kbd">B / E</span><span>Cọ vẽ / Tẩy</span>
+<span class="kbd">S</span><span>SAM nhấp điểm</span>
+<span class="kbd">[ / ]</span><span>Giảm / tăng cỡ cọ</span>
+<span class="kbd">↑ / ↓</span><span>Lát trước / sau</span>
+<span class="kbd">1–7</span><span>Chọn nhãn đang vẽ</span>
+<span class="kbd">Ctrl+Z / Ctrl+Y</span><span>Hoàn tác / làm lại</span>
+<span class="kbd">H</span><span>Ẩn/hiện mặt nạ</span>
+<span class="kbd">Ctrl+Enter</span><span>Hoàn tất & ca tiếp</span>
+</div>
+</details>
+</aside>
+</div>
+</main>
+</div>
+</template>
+<script src="assets/dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = {
+      lv: 2, nav: 0, tool: 3, cls: 0, wl: 0, brush: 12, opacity: 70, zoom: 100, slice: 14, qf: 0, cur: 0,
+      show: { mine: true, ai: true, r1: false, mid: false },
+      segHidden: {}, segDel: {},
+      l1: { ich: true, frac: false, dep: false, mls: false, ped: false },
+      sl: { 14: { edh: true } }, done: { 10: 'l', 11: 'l', 12: 'l', 13: 'l', 1: 'n', 2: 'n', 3: 'n', 4: 'n', 5: 'n', 6: 'n', 7: 'n', 8: 'n', 9: 'n' },
+      q: 1, flags: { motion: false, metal: false, surg: false, noreport: false, suture: false }, conf: 0,
+      hist: 4, redoN: 0, adj: false, toast: '', sec: 0
+    };
+  }
+  componentDidMount() { this.t = setInterval(() => this.setState({ sec: this.state.sec + 1 }), 1000); }
+  navVals(cur) {
+    const N = [['h','Lâm sàng'],['01','Tổng quan','Main'],['02','Tiếp nhận & sàng lọc','Intake'],['03','Danh sách ca đọc','Worklist'],['04','Đọc phim DICOM','Viewer'],['05','Phân tầng nguy cơ AI','Risk'],['06','Kết quả & báo cáo','Report'],['h','Phối hợp tuyến'],['07','Hội chẩn từ xa','Consult'],['08','Chuyển tuyến','Referral'],['09','Liên thông HIS/PACS','Integration'],['09b','Cấu hình liên thông','IntegrationConfig'],['10','Cảnh báo & trực','Alerts'],['h','Quản lý'],['11','Thống kê & chất lượng','Analytics'],['12','Quản trị hệ thống','Admin'],['h','AI Studio'],['13a','Dữ liệu & gán nhãn','Labeling'],['13b','Huấn luyện & đánh giá','Training'],['13c','Cấu hình mô hình AI','ModelConfig']];
+    return N.map(n => n[0] === 'h' ? { head: true, link: false, t: n[1] } : { head: false, link: true, num: n[0], t: n[1], href: n[2] + '.html', cls: n[2] === cur ? 'on' : '', cur: n[2] === cur ? 'page' : undefined });
+  }
+  act(patch, msg) { this.setState(Object.assign({ hist: this.state.hist + 1, redoN: 0, toast: msg || '' }, patch)); }
+  renderVals() {
+    const s = this.state;
+    const CL = [['EDH', '#F26B6B', 'edh'], ['SDH', '#F2B33D', 'sdh'], ['SAH', '#B48CF2', 'sah'], ['IPH', '#4CC3E0', 'iph'], ['IVH', '#3FBF7F', 'ivh'], ['Phù não', '#E58BD0', 'edema'], ['Đường giữa', '#B48CF2', 'mid']];
+    const L = [['L1 · Mức ca', 'Có/không xuất huyết, vỡ sọ, lún sọ, lệch đường giữa · khoảng 1 phút/ca'], ['L2 · Mức lát cắt', 'Gán 5 loại xuất huyết cho từng lát · khoảng 5–10 phút/ca'], ['L3 · Phân đoạn', 'Vẽ mặt nạ voxel máu tụ, phù; vẽ đường giữa · khoảng 20–40 phút/ca, có AI gợi ý trước'], ['X-quang · Khung bao', 'Khung bao đường vỡ, lún sọ; lưu ý đường khớp sọ ở trẻ em · khoảng 3–5 phút/ảnh']];
+    const NT = [['Cuộn', 'Con lăn chuột'], ['Phóng', 'Z'], ['Kéo', 'Space'], ['W/L', 'W']];
+    const DT = [['Cọ', 'B'], ['Tẩy', 'E'], ['Đa giác', 'P'], ['SAM điểm', 'S'], ['SAM hộp', 'Shift+S'], ['Khung bao', 'R'], ['Đường giữa', 'M'], ['Thước đo', 'D']];
+    const P = [['Não', 'W80 L40', 'none'], ['Máu tụ', 'W200 L80', 'contrast(1.35) brightness(1.05)'], ['Xương', 'W2800 L600', 'brightness(.55) contrast(2.2)'], ['Dưới màng cứng', 'W130 L50', 'contrast(1.6)']];
+    const toolNames = NT.map(x => x[0]).concat(DT.map(x => x[0]));
+    const toolIdx = s.nav >= 0 && s.tool < 0 ? s.nav : 4 + s.tool;
+    const lesion = s.slice >= 10 && s.slice <= 18;
+    const Q = [
+      ['CT-ANON-0817', 'Trẻ em', 'blu', 0.49, 'Đang gán'], ['CT-ANON-1102', 'XH dưới nhện', 'amb', 0.47, 'Chưa gán'], ['CT-ANON-0544', 'Trên 70t', 'amb', 0.44, 'Cần phân xử'],
+      ['XQ-ANON-0291', 'Ảnh điện thoại', 'gry', 0.41, 'Chưa gán'], ['CT-ANON-0930', 'Máu tụ nhỏ', 'gry', 0.38, 'Bị gắn cờ'], ['CT-ANON-1215', 'Đầu lệch', 'gry', 0.36, 'Chưa gán']
+    ];
+    const QF = ['Tất cả', 'Chưa gán', 'Cần phân xử', 'Bị gắn cờ'];
+    const sliceLab = s.sl[s.slice] || {};
+    const tgSl = k => () => { const cur = Object.assign({}, this.state.sl[this.state.slice] || {}); cur[k] = !cur[k]; this.act({ sl: Object.assign({}, this.state.sl, { [this.state.slice]: cur }) }); };
+    const segDefs = [['s1', 'EDH · thái dương phải', '#F26B6B', 'lát 10–18 · 22,4 ml'], ['s2', 'Phù não quanh ổ', '#E58BD0', 'lát 12–16 · 6,1 ml'], ['s3', 'Đường giữa', '#B48CF2', 'lệch 1,2 mm']];
+    const segs = segDefs.filter(d => !s.segDel[d[0]]).map(d => ({ t: d[1], col: d[2], d: d[3], on: !s.segHidden[d[0]], eye: s.segHidden[d[0]] ? 'Hiện' : 'Ẩn', tg: () => this.setState({ segHidden: Object.assign({}, this.state.segHidden, { [d[0]]: !this.state.segHidden[d[0]] }) }), del: () => this.act({ segDel: Object.assign({}, this.state.segDel, { [d[0]]: true }) }, 'Đã xóa lớp ' + d[1] + '. Có thể hoàn tác.') }));
+    const shown = k => !s.segHidden[k] && !s.segDel[k];
+    const flagsDef = [['motion', 'Nhiễu do bệnh nhân cử động'], ['metal', 'Dị vật kim loại gây nhiễu'], ['surg', 'Đã phẫu thuật sọ trước đó (tiêu chuẩn loại)'], ['noreport', 'Thiếu kết luận CĐHA (tiêu chuẩn loại)'], ['suture', 'Trẻ em: dễ nhầm đường khớp sọ']];
+    const m = Math.floor(s.sec / 60), sec = s.sec % 60;
+    const dice = s.segDel.s1 ? 0 : 0.71;
+    return {
+      nav: this.navVals('Labeling'),
+      caseId: Q[s.cur][0], timer: '00:' + String(18 + m).padStart(2, '0') + ':' + String(sec).padStart(2, '0'),
+      toast: s.toast,
+      undo: () => this.setState({ hist: Math.max(0, this.state.hist - 1), redoN: this.state.redoN + 1, toast: 'Đã hoàn tác 1 thao tác.' }),
+      redo: () => this.setState({ hist: this.state.hist + 1, redoN: Math.max(0, this.state.redoN - 1), toast: 'Đã làm lại 1 thao tác.' }),
+      noUndo: s.hist === 0, noRedo: s.redoN === 0,
+      saveDraft: () => this.setState({ toast: 'Đã lưu nháp lúc ' + new Date().toLocaleTimeString('vi-VN') + '.' }),
+      submit: () => this.setState({ cur: (this.state.cur + 1) % Q.length, slice: 14, toast: 'Đã gửi nhãn ' + Q[this.state.cur][0] + ' sang bước kiểm tra chất lượng.' }),
+      levels: L.map((l, i) => ({ t: l[0], sel: s.lv === i, cls: s.lv === i ? 'sel' : '', pick: () => this.setState({ lv: i, tool: i === 3 ? 5 : s.tool }) })),
+      levelDesc: L[s.lv][1],
+      navTools: NT.map((t, i) => ({ t: t[0], k: 'Phím: ' + t[1], sel: s.tool < 0 && s.nav === i, cls: s.tool < 0 && s.nav === i ? 'sel' : '', pick: () => this.setState({ nav: i, tool: -1 }) })),
+      drawTools: DT.map((t, i) => ({ t: t[0], k: 'Phím: ' + t[1], sel: s.tool === i, cls: s.tool === i ? 'sel' : '', pick: () => this.setState({ tool: i, show: Object.assign({}, this.state.show, i === 6 ? { mid: true } : {}) }) })),
+      toolName: s.tool < 0 ? NT[s.nav][0] : DT[s.tool][0],
+      cursor: s.tool < 0 ? (s.nav === 2 ? 'grab' : 'default') : 'crosshair',
+      classes: CL.map((c, i) => ({ t: c[0], col: c[1], sel: s.cls === i, cls: s.cls === i ? 'sel' : '', pick: () => this.setState({ cls: i }) })),
+      className: CL[s.cls][0], mineCol: CL[s.cls === 6 ? 0 : s.cls][1],
+      presets: P.map((p, i) => ({ t: p[0], wl: p[1], sel: s.wl === i, cls: s.wl === i ? 'sel' : '', pick: () => this.setState({ wl: i }) })),
+      flt: P[s.wl][2], wlText: P[s.wl][1],
+      brush: s.brush, onBrush: e => this.setState({ brush: +e.target.value }),
+      opacity: s.opacity, opacityF: String(s.opacity / 100), onOpacity: e => this.setState({ opacity: +e.target.value }),
+      zoom: s.zoom, scale: String(s.zoom / 100), zoomText: (s.zoom / 100).toFixed(1).replace('.', ',') + '×', onZoom: e => this.setState({ zoom: +e.target.value }),
+      layersShow: [['mine', 'Mặt nạ của tôi', '#F26B6B'], ['ai', 'Gợi ý AI (MedSAM)', '#4CC3E0'], ['r1', 'Người đọc 1', '#F7C25E'], ['mid', 'Đường giữa', '#B48CF2']].map(([k, t, c]) => ({ t, c, on: !!s.show[k], tg: () => this.setState({ show: Object.assign({}, this.state.show, { [k]: !this.state.show[k] }) }) })),
+      hasLesion: lesion,
+      showMine: s.show.mine && lesion && shown('s1') && (sliceLab.edh || (s.done[s.slice] === 'l')),
+      showAi: s.show.ai && lesion, showR1: s.show.r1 && lesion, showMid: s.show.mid && shown('s3'),
+      sliceInfo: lesion ? (sliceLab.edh || s.done[s.slice] === 'l' ? 'Có mặt nạ EDH ở lát này' : 'AI gợi ý có tổn thương, chưa gán') : (s.done[s.slice] === 'n' ? 'Đã duyệt: bình thường' : 'Chưa duyệt'),
+      slice: s.slice,
+      onSlice: e => this.setState({ slice: +e.target.value }),
+      prevSlice: () => this.setState({ slice: Math.max(1, this.state.slice - 1) }),
+      nextSlice: () => this.setState({ slice: Math.min(30, this.state.slice + 1) }),
+      strip: Array.from({ length: 30 }, (_, i) => { const n = i + 1; const d = s.done[n]; const lab = (s.sl[n] && Object.values(s.sl[n]).some(Boolean)) || d === 'l'; return { c: lab ? '#B84348' : d === 'n' ? '#2C6E80' : '#1E2733', o: n === s.slice ? '2px solid #E7EDF4' : 'none' }; }),
+      copyNext: () => { const n = Math.min(30, this.state.slice + 1); this.act({ sl: Object.assign({}, this.state.sl, { [n]: Object.assign({}, this.state.sl[this.state.slice] || {}) }), done: Object.assign({}, this.state.done, { [n]: 'l' }), slice: n }, 'Đã chép nhãn sang lát ' + n + '.'); },
+      interp: () => this.act({ done: Object.assign({}, this.state.done, { 15: 'l', 16: 'l', 17: 'l', 18: 'l' }) }, 'Đã nội suy mặt nạ cho lát 15–18. Vui lòng kiểm tra lại từng lát.'),
+      acceptAi: () => this.act({ sl: Object.assign({}, this.state.sl, { [this.state.slice]: Object.assign({}, this.state.sl[this.state.slice] || {}, { edh: true }) }), done: Object.assign({}, this.state.done, { [this.state.slice]: 'l' }) }, 'Đã nhận gợi ý AI cho lát ' + s.slice + ' (được ghi là "AI gợi ý, người chỉnh").'),
+      markNormal: () => this.act({ sl: Object.assign({}, this.state.sl, { [this.state.slice]: {} }), done: Object.assign({}, this.state.done, { [this.state.slice]: 'n' }) }, 'Lát ' + s.slice + ' đánh dấu bình thường.'),
+      segs, noSegs: segs.length === 0,
+      l1: [['ich', 'Có xuất huyết nội sọ', true], ['frac', 'Vỡ xương sọ', false], ['dep', 'Lún sọ', false], ['mls', 'Lệch đường giữa ≥ 5 mm', true], ['ped', 'Bệnh nhi (dưới 18 tuổi)', false]].map(([k, t, nlp]) => ({ t, nlp, on: !!s.l1[k], tg: () => this.act({ l1: Object.assign({}, this.state.l1, { [k]: !this.state.l1[k] }) }) })),
+      l2: CL.slice(0, 5).map(c => ({ t: c[0] === 'EDH' ? 'Ngoài màng cứng (EDH)' : c[0] === 'SDH' ? 'Dưới màng cứng (SDH)' : c[0] === 'SAH' ? 'Dưới nhện (SAH)' : c[0] === 'IPH' ? 'Trong nhu mô (IPH)' : 'Trong não thất (IVH)', col: c[1], on: !!sliceLab[c[2]], tg: tgSl(c[2]) })),
+      quality: ['Tốt', 'Chấp nhận', 'Kém'].map((t, i) => ({ t, sel: s.q === i, cls: s.q === i ? 'sel' : '', pick: () => this.act({ q: i }) })),
+      flags: flagsDef.map(([k, t]) => ({ t, on: !!s.flags[k], tg: () => this.act({ flags: Object.assign({}, this.state.flags, { [k]: !this.state.flags[k] }) }) })),
+      excluded: s.flags.surg || s.flags.noreport || s.q === 2,
+      conf: ['Chắc chắn', 'Khá chắc', 'Không chắc'].map((t, i) => ({ t, sel: s.conf === i, cls: s.conf === i ? 'sel' : '', pick: () => this.setState({ conf: i }) })),
+      dice: dice.toFixed(2).replace('.', ','), diceC: dice < 0.5 ? '#FF8A8A' : '#5FD39A',
+      agree: s.l1.ich ? 'Đồng ý' : 'Bất đồng', agreeCls: s.l1.ich ? 'grn' : 'red',
+      adj: () => this.setState({ adj: !this.state.adj, toast: this.state.adj ? '' : 'Đã gửi ca sang BS cấp cao phân xử.' }),
+      adjText: s.adj ? 'Đã gửi phân xử · hủy' : 'Gửi BS cấp cao phân xử',
+      qf: QF.map((t, i) => ({ t, sel: s.qf === i, cls: s.qf === i ? 'sel' : '', pick: () => this.setState({ qf: i }) })),
+      queue: Q.map((q, i) => ({ q, i })).filter(({ q }) => s.qf === 0 || q[4] === QF[s.qf] || (s.qf === 1 && q[4] === 'Đang gán')).map(({ q, i }) => ({ id: q[0], tag: q[1], tc: q[2], u: q[3].toFixed(2).replace('.', ','), w: Math.round(q[3] * 200), st: q[4], sel: s.cur === i, cls: s.cur === i ? 'sel' : '', pick: () => this.setState({ cur: i, toast: '' }) })),
+      prog: [
+        { t: 'L1 · mức ca', v: '2 410 / 3 000', w: 80, c: '#4CC3E0', d: 'Trích tự động bằng NLP, kiểm tra 10%' },
+        { t: 'L2 · mức lát', v: '1 284 / 3 000', w: 43, c: '#4CC3E0', d: 'BS CĐHA gán' },
+        { t: 'L3 · phân đoạn', v: '168 / 500', w: 34, c: '#F2B33D', d: 'Chỉ phân đoạn chi tiết 500 ca' },
+        { t: 'X-quang · khung bao', v: '612 / 1 800', w: 34, c: '#F2B33D', d: 'Gồm ảnh chụp phim bằng điện thoại' },
+        { t: 'Giờ công BS CĐHA', v: '312 / ~900 giờ', w: 35, c: '#93A3B8', d: 'Hạng mục chi phí lớn nhất' }
+      ]
+    };
+  }
+}
+DC.mount(Component);
+</script>
+</body>
+</html>
